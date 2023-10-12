@@ -10,7 +10,7 @@ using Utility;
 
 /*
  *
- * Copyright (c) 2022-2023 Carbon Community 
+ * Copyright (c) 2022-2023 Carbon Community
  * All rights reserved.
  *
  */
@@ -217,12 +217,12 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 			MethodDefinition method2 = type2.Methods.Single(x => x.Name == "Init_Tier0")
 				?? throw new Exception("Unable to get a method definition for 'Init_Tier0'");
 
+			if (method2.Body.Instructions.Any(x => x.OpCode == OpCodes.Call
+				&& x.Operand.ToString().Contains("Carbon.Bootstrap::Initialize"))) return;
+
 			ILProcessor processor = method2.Body.GetILProcessor();
 			Instruction instruction = processor.Create(
 				OpCodes.Call, _assembly.MainModule.ImportReference(method1));
-
-			if (method2.Body.Instructions.Any(x => x.OpCode == OpCodes.Call
-				&& x.Operand.ToString().Contains("Carbon.Bootstrap::Initialize"))) return;
 
 			Logger.Debug($" - Patching Bootstrap.Init_Tier0");
 

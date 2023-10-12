@@ -5,7 +5,7 @@ using Utility;
 
 /*
  *
- * Copyright (c) 2022-2023 Carbon Community 
+ * Copyright (c) 2022-2023 Carbon Community
  * All rights reserved.
  *
  */
@@ -16,6 +16,8 @@ public sealed class Entrypoint
 {
 	private static readonly string[] Preload = {
 		Path.Combine(Context.CarbonLib, "0Harmony.dll"),
+		Path.Combine(Context.CarbonLib, "Ben.Demystifier.dll"),
+		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
 	};
 
 	public static void Start()
