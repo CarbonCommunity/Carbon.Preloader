@@ -4,7 +4,7 @@ using Carbon.Extensions;
 
 /*
  *
- * Copyright (c) 2022-2023 Carbon Community 
+ * Copyright (c) 2022-2023 Carbon Community
  * All rights reserved.
  *
  */
@@ -18,7 +18,7 @@ internal sealed class Context
 
 	internal static readonly string
 		Game, GameManaged,
-		Carbon, CarbonManaged, CarbonLib, CarbonHooks, CarbonModules, CarbonLogs;
+		Carbon, CarbonManaged, CarbonLib, CarbonHooks, CarbonModules, CarbonExtensions, CarbonLogs;
 
 	static Context()
 	{
@@ -52,6 +52,9 @@ internal sealed class Context
 
 			CarbonHooks = Path.Combine(CarbonManaged, "hooks");
 			if (!Directory.Exists(CarbonHooks)) Directory.CreateDirectory(CarbonModules);
+
+			CarbonExtensions = Path.Combine(Carbon, "extensions");
+			if (!Directory.Exists(CarbonExtensions)) Directory.CreateDirectory(CarbonExtensions);
 
 			CarbonModules = Path.Combine(CarbonManaged, "modules");
 			if (!Directory.Exists(CarbonModules)) Directory.CreateDirectory(CarbonModules);
