@@ -21,7 +21,8 @@ public sealed class Entrypoint
 		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
 	};
 	private static readonly string[] Cleanup = {
-		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll")
+		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
+		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll")
 	};
 
 	public static void Start()
