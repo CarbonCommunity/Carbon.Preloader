@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using Patches;
 using Utility;
@@ -19,9 +20,15 @@ public sealed class Entrypoint
 		Path.Combine(Context.CarbonLib, "Ben.Demystifier.dll"),
 		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
 	};
+	private static readonly string[] Cleanup = {
+		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
+		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll")
+	};
 
 	public static void Start()
 	{
+		PerformCleanup();
+
 		string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
 		Logger.Log($">> {assemblyName} is using a mono injector as entrypoint");
 
@@ -88,6 +95,26 @@ public sealed class Entrypoint
 			catch (System.Exception e)
 			{
 				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
+			}
+		}
+	}
+
+	public static void PerformCleanup()
+	{
+		foreach (var file in Cleanup)
+		{
+			if (!File.Exists(file))
+			{
+				continue;
+			}
+
+			try
+			{
+				File.Delete(file);
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"Cleanup process error! Failed removing '{file}'", ex);
 			}
 		}
 	}
