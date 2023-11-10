@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Patches;
@@ -21,7 +22,12 @@ public sealed class Entrypoint
 		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
 	};
 	private static readonly string[] Cleanup = {
-		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll")
+		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
+		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll")
+	};
+	private static readonly Dictionary<string, string> Move = new () {
+		[Path.Combine(Context.Carbon, "CCL", "oxide")] = Path.Combine(Context.CarbonExtensions),
+		[Path.Combine(Context.Carbon, "CCL", "harmony")] = Path.Combine(Context.CarbonHarmony)
 	};
 
 	public static void Start()
@@ -91,9 +97,31 @@ public sealed class Entrypoint
 				Assembly harmony = Assembly.LoadFile(file);
 				Logger.Log($"Loaded {harmony.GetName().Name} {harmony.GetName().Version} into current AppDomain");
 			}
-			catch (System.Exception e)
+			catch (Exception e)
 			{
 				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
+			}
+		}
+
+		foreach (var folder in Move)
+		{
+			if (!Directory.Exists(folder.Key))
+			{
+				continue;
+			}
+
+			if (!Directory.Exists(folder.Value))
+			{
+				Directory.CreateDirectory(folder.Value);
+			}
+
+			try
+			{
+				IO.Move(folder.Key, folder.Value);
+			}
+			catch (Exception e)
+			{
+				Logger.Log($"Unable to move '{folder.Key}' -> '{folder.Value}' ({e?.Message})");
 			}
 		}
 	}
