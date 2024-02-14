@@ -2,7 +2,7 @@
 
 /*
  *
- * Copyright (c) 2022-2023 Carbon Community 
+ * Copyright (c) 2022-2024 Carbon Community
  * All rights reserved.
  *
  */
@@ -16,7 +16,8 @@ internal static class Blacklist
 	{
 		@"^SpawnGroup.(GetSpawnPoint|PostSpawnProcess|Spawn)$",
 		@"^ScientistNPC.OverrideCorpseName$",
-		@"^TriggerParentElevator.IsClipping$"
+		@"^TriggerParentElevator.IsClipping$",
+		@"^DroppedItem.TransformHasMoved$"
 	};
 
 	internal static bool IsBlacklisted(string Name)
