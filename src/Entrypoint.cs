@@ -19,6 +19,10 @@ public sealed class Entrypoint
 	private static readonly string[] Preload = {
 		Path.Combine(Context.CarbonLib, "0Harmony.dll"),
 		Path.Combine(Context.CarbonLib, "Ben.Demystifier.dll"),
+		Path.Combine(Context.CarbonLib, "MonoMod.Core.dll"),
+		Path.Combine(Context.CarbonLib, "MonoMod.Utils.dll"),
+		Path.Combine(Context.CarbonLib, "MonoMod.ILHelpers.dll"),
+		Path.Combine(Context.CarbonLib, "MonoMod.Backports.dll"),
 		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
 	};
 	private static readonly string[] Cleanup = {
@@ -95,7 +99,7 @@ public sealed class Entrypoint
 			try
 			{
 				Assembly harmony = Assembly.LoadFile(file);
-				Logger.Log($"Loaded {harmony.GetName().Name} {harmony.GetName().Version} into current AppDomain");
+				Logger.Log($"Loaded {harmony.GetName().Name} {harmony.GetName().Version}");
 			}
 			catch (Exception e)
 			{
