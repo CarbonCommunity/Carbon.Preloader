@@ -99,7 +99,7 @@ public sealed class Entrypoint
 			try
 			{
 				Assembly harmony = Assembly.LoadFile(file);
-				Logger.Log($"Loaded {harmony.GetName().Name} {harmony.GetName().Version}");
+				Logger.Log($"Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
 			}
 			catch (Exception e)
 			{
