@@ -16,18 +16,31 @@ namespace Doorstop;
 
 public sealed class Entrypoint
 {
-	private static readonly string[] Preload = {
-		Path.Combine(Context.CarbonLib, "0Harmony.dll"),
-		Path.Combine(Context.CarbonLib, "Ben.Demystifier.dll"),
+	private static readonly string[] Preload =
+	{
+		Path.Combine(Context.CarbonLib, "0Harmony.dll"), Path.Combine(Context.CarbonLib, "Ben.Demystifier.dll"),
+		Path.Combine(Context.CarbonLib, "MonoMod.Core.dll"), Path.Combine(Context.CarbonLib, "MonoMod.Utils.dll"),
+		Path.Combine(Context.CarbonLib, "MonoMod.ILHelpers.dll"),
+		Path.Combine(Context.CarbonLib, "MonoMod.Backports.dll"),
 		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
 	};
-	private static readonly string[] Cleanup = {
+
+	private static readonly string[] Cleanup =
+	{
 		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
 		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll")
 	};
-	private static readonly Dictionary<string, string> Move = new () {
+
+	private static readonly Dictionary<string, string> Move = new()
+	{
 		[Path.Combine(Context.Carbon, "CCL", "oxide")] = Path.Combine(Context.CarbonExtensions),
 		[Path.Combine(Context.Carbon, "CCL", "harmony")] = Path.Combine(Context.CarbonHarmony)
+	};
+
+	private static readonly Dictionary<string, string> Rename = new()
+	{
+		[Path.Combine(Context.Carbon, "config_client.json")] = Path.Combine(Context.Carbon, "config.client.json"),
+		[Path.Combine(Context.Carbon, "carbonauto.cfg")] = Path.Combine(Context.Carbon, "config.auto.cfg")
 	};
 
 	public static void Start()
@@ -62,7 +75,7 @@ public sealed class Entrypoint
 
 		using Sandbox<FacepunchNetwork> isolated4 = new Sandbox<FacepunchNetwork>();
 		{
-			if(!isolated4.Do.IsPublic("Networkable", "sv"))
+			if (!isolated4.Do.IsPublic("Networkable", "sv"))
 			{
 				isolated4.Do.Publicize();
 			}
@@ -95,7 +108,7 @@ public sealed class Entrypoint
 			try
 			{
 				Assembly harmony = Assembly.LoadFile(file);
-				Logger.Log($"Loaded {harmony.GetName().Name} {harmony.GetName().Version} into current AppDomain");
+				Logger.Log($"Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
 			}
 			catch (Exception e)
 			{
@@ -103,6 +116,32 @@ public sealed class Entrypoint
 			}
 		}
 
+		PerformMove();
+		PerformRename();
+	}
+
+	public static void PerformCleanup()
+	{
+		foreach (var file in Cleanup)
+		{
+			if (!File.Exists(file))
+			{
+				continue;
+			}
+
+			try
+			{
+				File.Delete(file);
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($"Cleanup process error! Failed removing '{file}'", ex);
+			}
+		}
+	}
+
+	public static void PerformMove()
+	{
 		foreach (var folder in Move)
 		{
 			if (!Directory.Exists(folder.Key))
@@ -126,22 +165,19 @@ public sealed class Entrypoint
 		}
 	}
 
-	public static void PerformCleanup()
+	public static void PerformRename()
 	{
-		foreach (var file in Cleanup)
+		foreach (var file in Rename)
 		{
-			if (!File.Exists(file))
-			{
-				continue;
-			}
-
 			try
 			{
-				File.Delete(file);
+				if (!File.Exists(file.Key)) continue;
+
+				File.Move(file.Key, file.Value);
 			}
-			catch (Exception ex)
+			catch (Exception e)
 			{
-				Logger.Error($"Cleanup process error! Failed removing '{file}'", ex);
+				Logger.Log($"Unable to rename '{file.Key}' -> '{file.Value}' ({e?.Message})");
 			}
 		}
 	}
