@@ -270,14 +270,14 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 	{
 		try
 		{
-			Logger.Log(" - Validating changes in-memory");
+			Logger.Debug(" - Validating changes in-memory");
 
 			using MemoryStream memoryStream = new MemoryStream();
 			_assembly.Write(memoryStream);
 			memoryStream.Position = 0;
 			_assembly.Dispose();
 
-			Logger.Log(" - Writing changes to disk");
+			Logger.Debug(" - Writing changes to disk");
 
 			using FileStream outputStream = File.Open(_filename, FileMode.Create); //  + ".new.dll"
 			memoryStream.CopyTo(outputStream);
