@@ -48,7 +48,7 @@ public sealed class Entrypoint
 		PerformCleanup();
 
 		string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-		Logger.Log($">> {assemblyName} is using a mono injector as entrypoint");
+		Logger.Debug($">> {assemblyName} is using a mono injector as entrypoint");
 
 		using Sandbox<AssemblyCSharp> isolated1 = new Sandbox<AssemblyCSharp>();
 		{
@@ -108,7 +108,7 @@ public sealed class Entrypoint
 			try
 			{
 				Assembly harmony = Assembly.LoadFile(file);
-				Logger.Log($"Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
+				Logger.Log($" Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
 			}
 			catch (Exception e)
 			{
@@ -160,7 +160,7 @@ public sealed class Entrypoint
 			}
 			catch (Exception e)
 			{
-				Logger.Log($"Unable to move '{folder.Key}' -> '{folder.Value}' ({e?.Message})");
+				Logger.Debug($"Unable to move '{folder.Key}' -> '{folder.Value}' ({e?.Message})");
 			}
 		}
 	}
@@ -177,7 +177,7 @@ public sealed class Entrypoint
 			}
 			catch (Exception e)
 			{
-				Logger.Log($"Unable to rename '{file.Key}' -> '{file.Value}' ({e?.Message})");
+				Logger.Debug($"Unable to rename '{file.Key}' -> '{file.Value}' ({e?.Message})");
 			}
 		}
 	}
