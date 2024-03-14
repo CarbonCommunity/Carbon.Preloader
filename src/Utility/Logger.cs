@@ -5,7 +5,7 @@ using System.Reflection;
 
 /*
  *
- * Copyright (c) 2022-2024 Carbon Community 
+ * Copyright (c) 2022-2024 Carbon Community
  * All rights reserved.
  *
  */
@@ -36,7 +36,7 @@ internal sealed class Logger
 		string formatted = severity switch
 		{
 			Severity.None => $"{message}",
-			Severity.Notice => $"[i] {message}",
+			Severity.Notice => $"{message}",
 			Severity.Warning => $"[w] {message}",
 			Severity.Error => $"[e] {message}",
 			Severity.Debug => $"[d] {message}",
@@ -45,17 +45,19 @@ internal sealed class Logger
 
 		lock (Lock)
 		{
-#if DEBUG
 			if (ex is not null)
 			{
 				formatted += $" ({ex?.Message})\n{ex?.StackTrace}";
 			}
 
-			if (severity != Severity.Debug)
+			switch (severity)
 			{
-				Console.WriteLine(formatted);
+				case Severity.Error:
+				case Severity.Notice:
+					Console.WriteLine(formatted);
+					break;
 			}
-#endif
+
 			File.AppendAllText(logFile,
 				$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {formatted}" + Environment.NewLine);
 		}
