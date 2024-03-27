@@ -26,7 +26,8 @@ public sealed class Entrypoint
 	private static readonly string[] Cleanup =
 	{
 		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
-		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll")
+		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll"),
+		Context.CarbonReport
 	};
 
 	private static readonly Dictionary<string, string> Move = new()
@@ -120,20 +121,25 @@ public sealed class Entrypoint
 
 	public static void PerformCleanup()
 	{
-		foreach (var file in Cleanup)
+		foreach (var path in Cleanup)
 		{
-			if (!File.Exists(file))
+			if (!File.Exists(path))
 			{
+				if (Directory.Exists(path))
+				{
+					Directory.Delete(path);
+				}
+
 				continue;
 			}
 
 			try
 			{
-				File.Delete(file);
+				File.Delete(path);
 			}
 			catch (Exception ex)
 			{
-				Logger.Error($"Cleanup process error! Failed removing '{file}'", ex);
+				Logger.Error($"Cleanup process error! Failed removing '{path}'", ex);
 			}
 		}
 	}
