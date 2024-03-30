@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Patches;
 using Utility;
@@ -23,11 +24,34 @@ public sealed class Entrypoint
 		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
 	};
 
-	private static readonly string[] Cleanup =
+	private static readonly string[] Delete =
 	{
 		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
 		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll"),
-		Context.CarbonReport
+		Context.CarbonReport,
+		Path.Combine(Context.GameManaged, "x64"),
+		Path.Combine(Context.GameManaged, "x86"),
+		Path.Combine(Context.GameManaged, "Oxide.Common.dll"),
+		Path.Combine(Context.GameManaged, "Oxide.Core.dll"),
+		Path.Combine(Context.GameManaged, "Oxide.CSharp.dll"),
+		Path.Combine(Context.GameManaged, "Oxide.MySql.dll"),
+		Path.Combine(Context.GameManaged, "Oxide.References.dll"),
+		Path.Combine(Context.GameManaged, "Oxide.Rust.dll"),
+		Path.Combine(Context.GameManaged, "Oxide.SQLite.dll"),
+		Path.Combine(Context.GameManaged, "Oxide.Unity.dll")
+	};
+
+	private static readonly Dictionary<KeyValuePair<string, string>, string> WildcardMove = new()
+	{
+		[new KeyValuePair<string, string>(Context.GameManaged, "Oxide.Ext.")] = Path.Combine(Context.CarbonExtensions)
+	};
+
+	private static readonly Dictionary<string, string> CopyTargetEmpty = new()
+	{
+		[Path.Combine(Context.Game, "oxide", "config")] = Path.Combine(Context.Carbon, "configs"),
+		[Path.Combine(Context.Game, "oxide", "data")] = Path.Combine(Context.Carbon, "data"),
+		[Path.Combine(Context.Game, "oxide", "plugins")] = Path.Combine(Context.Carbon, "plugins"),
+		[Path.Combine(Context.Game, "oxide", "lang")] = Path.Combine(Context.Carbon, "lang")
 	};
 
 	private static readonly Dictionary<string, string> Move = new()
@@ -44,8 +68,6 @@ public sealed class Entrypoint
 
 	public static void Start()
 	{
-		PerformCleanup();
-
 		string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
 		Logger.Debug($">> {assemblyName} is using a mono injector as entrypoint");
 
@@ -116,30 +138,94 @@ public sealed class Entrypoint
 		}
 
 		PerformMove();
+		PerformWildcardMove();
 		PerformRename();
+		PerformCleanup();
+		PerformCopyTargetEmpty();
 	}
 
 	public static void PerformCleanup()
 	{
-		foreach (var path in Cleanup)
+		foreach (var path in Delete)
 		{
-			if (!File.Exists(path))
+			try
 			{
-				if (Directory.Exists(path))
+				if (!File.Exists(path))
 				{
-					Directory.Delete(path);
+					if (Directory.Exists(path))
+					{
+						Logger.Log($" Removed '{Path.GetFileName(path)}' from RustDedicated_Data/Managed");
+						Directory.Delete(path, true);
+					}
+
+					continue;
 				}
 
+				Logger.Log($" Removed '{Path.GetFileName(path)}' from RustDedicated_Data/Managed");
+				File.Delete(path);
+			}
+			catch (Exception ex)
+			{
+				Logger.Error($" Cleanup process error! Failed removing '{path}'", ex);
+			}
+		}
+	}
+
+	public static void PerformWildcardMove()
+	{
+		foreach (var fileWildcard in WildcardMove)
+		{
+			var files = Directory.GetFiles(fileWildcard.Key.Key);
+
+			foreach (var file in files)
+			{
+				if (!file.Contains(fileWildcard.Key.Value))
+				{
+					continue;
+				}
+
+				Logger.Log($" Moved {Path.GetFileName(file)} -> carbon/{Path.GetFileName(fileWildcard.Value)}");
+				File.Move(file, $"{Path.Combine(fileWildcard.Value, Path.GetFileName(file))}");
+			}
+		}
+	}
+
+	public static void PerformCopyTargetEmpty()
+	{
+		if (CopyTargetEmpty.Any(x => Directory.Exists(x.Value) && new DirectoryInfo(x.Value).GetFiles().Any()))
+		{
+			return;
+		}
+
+		if (!Directory.Exists(Path.Combine(Context.Game, "oxide")))
+		{
+			return;
+		}
+
+		Logger.Log($" Fresh Carbon installation detected. Migrating Oxide directories.");
+
+		foreach (var folder in CopyTargetEmpty)
+		{
+			if (!Directory.Exists(folder.Key))
+			{
+				continue;
+			}
+
+			var target = new DirectoryInfo(folder.Value);
+
+			if (target.GetFiles().Any())
+			{
 				continue;
 			}
 
 			try
 			{
-				File.Delete(path);
+				Logger.Log($" Copied oxide/{Path.GetFileName(folder.Key)} -> carbon/{Path.GetFileName(folder.Value)}");
+				IO.Copy(folder.Key, folder.Value);
 			}
-			catch (Exception ex)
+			catch (Exception e)
 			{
-				Logger.Error($"Cleanup process error! Failed removing '{path}'", ex);
+				Logger.Debug($" Unable to copy '{folder.Key}' -> '{folder.Value}' ({e?.Message})");
 			}
 		}
 	}
@@ -164,7 +250,7 @@ public sealed class Entrypoint
 			}
 			catch (Exception e)
 			{
-				Logger.Debug($"Unable to move '{folder.Key}' -> '{folder.Value}' ({e?.Message})");
+				Logger.Debug($" Unable to move '{folder.Key}' -> '{folder.Value}' ({e?.Message})");
 			}
 		}
 	}
@@ -181,7 +267,7 @@ public sealed class Entrypoint
 			}
 			catch (Exception e)
 			{
-				Logger.Debug($"Unable to rename '{file.Key}' -> '{file.Value}' ({e?.Message})");
+				Logger.Debug($" Unable to rename '{file.Key}' -> '{file.Value}' ({e?.Message})");
 			}
 		}
 	}
