@@ -66,7 +66,8 @@ public sealed class Entrypoint
 	private static readonly Dictionary<string, string> Rename = new()
 	{
 		[Path.Combine(Context.Carbon, "config_client.json")] = Path.Combine(Context.Carbon, "config.client.json"),
-		[Path.Combine(Context.Carbon, "carbonauto.cfg")] = Path.Combine(Context.Carbon, "config.auto.cfg")
+		[Path.Combine(Context.Carbon, "carbonauto.cfg")] = Path.Combine(Context.Carbon, "config.auto.json"),
+		[Path.Combine(Context.Carbon, "config.auto.cfg")] = Path.Combine(Context.Carbon, "config.auto.json")
 	};
 
 	#region Native MonoProfiler
