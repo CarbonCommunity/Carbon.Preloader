@@ -71,7 +71,7 @@ public sealed class Entrypoint
 
 	#region Native MonoProfiler
 
-	[DllImport("carbon_native")]
+	[DllImport("CarbonNative")]
 	public static unsafe extern void init_profiler(char* ptr, int length);
 
 	[DllImport("__Internal", CharSet = CharSet.Ansi)]
@@ -80,9 +80,9 @@ public sealed class Entrypoint
 	public static unsafe void InitNative()
 	{
 #if UNIX
-        mono_dllmap_insert(ModuleHandle.EmptyHandle, "carbon_native", null, Path.Combine(Context.Carbon, "native", "libCarbonNative.so"), null);
+        mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "libCarbonNative.so"), null);
 #elif WIN
-		mono_dllmap_insert(ModuleHandle.EmptyHandle, "carbon_native", null, Path.Combine(Context.Carbon, "native", "CarbonNative.dll"), null);
+		mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "CarbonNative.dll"), null);
 #endif
 
 		var path = Path.Combine(Context.Carbon, "config.profiler.json");
