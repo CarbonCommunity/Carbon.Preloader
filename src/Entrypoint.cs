@@ -80,9 +80,7 @@ public sealed class Entrypoint
 
 	public static unsafe void InitNative()
 	{
-#if UNIX
-        mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "libCarbonNative.so"), null);
-#elif WIN
+#if WIN
 		mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "CarbonNative.dll"), null);
 #endif
 
