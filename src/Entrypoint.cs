@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security;
 using Patches;
 using Utility;
 
@@ -15,6 +17,7 @@ using Utility;
 
 namespace Doorstop;
 
+[SuppressUnmanagedCodeSecurity]
 public sealed class Entrypoint
 {
 	private static readonly string[] Preload =
@@ -63,11 +66,47 @@ public sealed class Entrypoint
 	private static readonly Dictionary<string, string> Rename = new()
 	{
 		[Path.Combine(Context.Carbon, "config_client.json")] = Path.Combine(Context.Carbon, "config.client.json"),
-		[Path.Combine(Context.Carbon, "carbonauto.cfg")] = Path.Combine(Context.Carbon, "config.auto.cfg")
+		[Path.Combine(Context.Carbon, "carbonauto.cfg")] = Path.Combine(Context.Carbon, "config.auto.json"),
+		[Path.Combine(Context.Carbon, "config.auto.cfg")] = Path.Combine(Context.Carbon, "config.auto.json")
 	};
+
+	#region Native MonoProfiler
+
+	[DllImport("CarbonNative")]
+	public static unsafe extern void init_profiler(char* ptr, int length);
+
+	[DllImport("__Internal", CharSet = CharSet.Ansi)]
+	public static extern void mono_dllmap_insert(ModuleHandle assembly, string dll, string func, string tdll, string tfunc);
+
+	public static unsafe void InitNative()
+	{
+#if UNIX
+        mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "libCarbonNative.so"), null);
+#elif WIN
+		mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "CarbonNative.dll"), null);
+#endif
+
+		var path = Path.Combine(Context.Carbon, "config.profiler.json");
+
+		fixed (char* ptr = path)
+		{
+			init_profiler(ptr, path.Length);
+		}
+	}
+
+	#endregion
 
 	public static void Start()
 	{
+		try
+		{
+			InitNative();
+		}
+		catch (Exception ex)
+		{
+			Logger.Error("Failed to init native", ex);
+		}
+
 		string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
 		Logger.Debug($">> {assemblyName} is using a mono injector as entrypoint");
 
