@@ -145,22 +145,6 @@ internal sealed class RustHarmony : MarshalByRefObject
 		}
 	}
 
-	private void Nuke_them_all()
-	{
-		string[] whitelist = {
-			"HarmonyModInfo",
-			"IHarmonyModHooks",
-			"OnHarmonyModLoadedArgs",
-			"OnHarmonyModUnloadedArgs"
-		};
-
-		foreach (TypeDefinition type in _assembly.MainModule.GetTypes())
-		{
-			if (!whitelist.Contains(type.Name))
-				_assembly.MainModule.Types.Remove(type);
-		}
-	}
-
 	internal void Write()
 	{
 		try
