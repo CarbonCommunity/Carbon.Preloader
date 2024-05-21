@@ -109,7 +109,14 @@ public static class SelfUpdater
 	}
 	internal static void Execute()
 	{
-		if (Versions.GetVersion(Tag).Equals(Versions.CurrentVersion))
+		var tag = Versions.GetVersion(Tag);
+
+		if (tag == null || string.IsNullOrEmpty(tag.Version))
+		{
+			return;
+		}
+
+		if (tag.Version.Equals(Versions.CurrentVersion))
 		{
 			Logger.Log($" Carbon is up to date. No self-updating necessary.");
 			return;
