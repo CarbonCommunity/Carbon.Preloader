@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 namespace Utility
 {
@@ -108,5 +109,24 @@ namespace Utility
 			return null;
 		}
 
+		public static bool ExecuteProcess(string applicationPath, string arguments, ProcessWindowStyle windowStyle = ProcessWindowStyle.Hidden)
+		{
+			var processInfo = new ProcessStartInfo
+			{
+				FileName = applicationPath,
+				Arguments = arguments,
+				WindowStyle = ProcessWindowStyle.Hidden
+			};
+			var downloadProcess = Process.Start(processInfo);
+
+			if (downloadProcess == null)
+			{
+				return false;
+			}
+
+			downloadProcess.WaitForExit();
+
+			return true;
+		}
 	}
 }

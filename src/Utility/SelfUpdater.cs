@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Doorstop;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 
@@ -28,10 +29,42 @@ public static class SelfUpdater
 	internal static string Repository;
 	internal static string Target;
 	internal static bool IsMinimal;
+	internal static readonly string[] Files =
+	[
+		@"carbon/managed/Carbon.dll",
+		@"carbon/managed/Carbon.Common.dll",
+		@"carbon/managed/Carbon.Common.Client.dll",
+		@"carbon/managed/Carbon.Bootstrap.dll",
+		@"carbon/managed/Carbon.Compat.dll",
+		@"carbon/managed/Carbon.Preloader.dll",
+		@"carbon/managed/Carbon.SDK.dll",
+		@"carbon/managed/hooks/Carbon.Hooks.Base.dll",
+		@"carbon/managed/lib",
+		@"carbon/managed/modules",
+		@"carbon/native/CarbonNative.dll"
+	];
+	internal static string Tag => Release switch
+	{
+		ReleaseType.Edge => "edge_build",
+		ReleaseType.Preview => "preview_build",
+		ReleaseType.Release => "release_build",
+		ReleaseType.Staging => "rustbeta_staging_build",
+		ReleaseType.Aux01 => "rustbeta_aux01_build",
+		ReleaseType.Aux02 => "rustbeta_aux02_build",
+		ReleaseType.Production => "production_build",
+		_ => throw new ArgumentOutOfRangeException()
+	};
+	internal static string File => Platform switch
+	{
+		OsType.Windows => $"Carbon.Windows.{Target}.zip",
+		OsType.Linux => $"Carbon.Linux.{Target}.tar.gz",
+		_ => throw new ArgumentOutOfRangeException()
+	};
 
 	public enum OsType { Windows, Linux }
-
 	public enum ReleaseType { Edge, Preview, Release, Staging, Aux01, Aux02, Production }
+
+	public const string CarbonVersionsEndpoint = "https://carbonmod.gg/api";
 
 	internal static void Init()
 	{
@@ -74,108 +107,53 @@ public static class SelfUpdater
 		"Debug";
 #endif
 	}
-
-	internal static string GithubReleaseUrl()
+	internal static void Execute()
 	{
-		string tag = Release switch
+		if (Versions.GetVersion(Tag).Equals(Versions.CurrentVersion))
 		{
-			ReleaseType.Edge => "edge_build",
-			ReleaseType.Preview => "preview_build",
-			ReleaseType.Release => "release_build",
-			ReleaseType.Staging => "rustbeta_staging_build",
-			ReleaseType.Aux01 => "rustbeta_aux01_build",
-			ReleaseType.Aux02 => "rustbeta_aux02_build",
-			ReleaseType.Production => "production_build",
-			_ => throw new ArgumentOutOfRangeException()
-		};
-
-		string file = Platform switch
-		{
-			OsType.Windows => $"Carbon.Windows.{Target}.zip",
-			OsType.Linux => $"Carbon.Linux.{Target}.tar.gz",
-			_ => throw new ArgumentOutOfRangeException()
-		};
-
-		return $"http://github.com/{Repository}/releases/download/{tag}/{file}";
-	}
-
-	public static byte[] ReadFully(Stream input)
-	{
-		using MemoryStream ms = new MemoryStream();
-
-		byte[] buffer = new byte[4096];
-		int read;
-
-		while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-		{
-			ms.Write(buffer, 0, read);
+			Logger.Log($" Carbon is up to date. No self-updating necessary.");
+			return;
 		}
-
-		return ms.ToArray();
-	}
-
-	internal static bool Execute()
-	{
-		string[] files =
-		[
-			@"carbon/managed/Carbon.dll",
-			@"carbon/managed/Carbon.Common.dll",
-			@"carbon/managed/Carbon.Common.Client.dll",
-			@"carbon/managed/Carbon.Bootstrap.dll",
-			@"carbon/managed/Carbon.Compat.dll",
-			@"carbon/managed/Carbon.Preloader.dll",
-			@"carbon/managed/Carbon.SDK.dll",
-			@"carbon/managed/hooks/Carbon.Hooks.Base.dll",
-			@"carbon/managed/lib",
-			@"carbon/managed/modules",
-			@"carbon/native/CarbonNative.dll"
-		];
 
 		string url = GithubReleaseUrl();
 		Logger.Log($"Updating component 'Carbon' using the '{Release} [{Platform}]' branch");
 
-		var processInfo = new ProcessStartInfo
-		{
-			FileName = "curl",
-			Arguments = $"-fSL -o {Path.Combine(Context.CarbonTemp, "patch.zip")} \"{url}\"",
-			WindowStyle = ProcessWindowStyle.Hidden
-		};
-		var downloadProcess = Process.Start(processInfo);
-
-		if (downloadProcess == null)
-		{
-			return false;
-		}
-
-		downloadProcess.WaitForExit();
+		IO.ExecuteProcess("curl", $"-fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
 
 		try
 		{
-			using FileStream archive = File.OpenRead(Path.Combine(Context.CarbonTemp, "patch.zip"));
+			using FileStream archive = System.IO.File.OpenRead(Path.Combine(Context.CarbonTemp, "patch.zip"));
 			using IReader reader = ReaderFactory.Open(archive);
-			
+
 			while (reader.MoveToNextEntry())
 			{
-				if (reader.Entry.IsDirectory && files.Any(x => reader.Entry.Key.Contains(x)))
-				{
-					reader.WriteEntryToDirectory(Context.Game);
-					continue;
-				}
+				// Logger.Log($" - Seeking {reader.Entry.Key} ?{reader.Entry.IsDirectory}");
 
-				if (!files.Contains(reader.Entry.Key, StringComparer.OrdinalIgnoreCase)) continue;
+				if (!Files.Any(x => reader.Entry.Key.Contains(x))) continue;
+
 				string destination = Path.Combine(Context.Game, reader.Entry.Key);
 				using EntryStream entry = reader.OpenEntryStream();
 				using var fs = new FileStream(destination, FileMode.OpenOrCreate);
 				Logger.Log($" - Updated {destination}");
 				entry.CopyTo(fs);
 			}
-
-			return true;
 		}
 		catch (Exception e)
 		{
 			Logger.Error($"Error while updating 'Carbon [{Platform}]'", e);
-			return false;
 		}
+	}
+
+	internal static bool GetCarbonVersions()
+	{
+		var tempPath = Path.Combine(Context.CarbonTemp, "versions.json");
+		var gotVersions = IO.ExecuteProcess("curl", $"-fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
+
+		return gotVersions && Versions.Init(System.IO.File.ReadAllText(tempPath));
+	}
+
+	internal static string GithubReleaseUrl()
+	{
+		return $"http://github.com/{Repository}/releases/download/{Tag}/{File}";
 	}
 }

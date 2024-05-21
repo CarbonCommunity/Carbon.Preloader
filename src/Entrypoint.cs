@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -117,10 +118,11 @@ public sealed class Entrypoint
 				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
 			}
 		}
-
+		
 		if (Config.Singleton.SelfUpdating.Enabled)
 		{
 			SelfUpdater.Init();
+			SelfUpdater.GetCarbonVersions();
 
 			try
 			{
@@ -133,7 +135,7 @@ public sealed class Entrypoint
 		}
 		else
 		{
-			Logger.Warn("Skipped self-updating process due to disabled status.");
+			Logger.Log(" Skipped self-updating process due to disabled status.");
 		}
 
 		foreach (string file in PreloadPostUpdate)
