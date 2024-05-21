@@ -25,7 +25,7 @@ public class Versions
 		{
 			var version = Assembly.GetExecutingAssembly().GetName().Version;
 
-			return $"{version.Major}.{version.Minor:0000}.{version.Build:0000}";
+			return $"1.{version.Major}.{version.Minor:0000}.{version.Build:0000}";
 		}
 	}
 

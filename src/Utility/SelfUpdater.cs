@@ -123,7 +123,7 @@ public static class SelfUpdater
 		}
 
 		string url = GithubReleaseUrl();
-		Logger.Log($"Updating component 'Carbon' using the '{Release} [{Platform}]' branch");
+		Logger.Log($"Updating component 'Carbon' using the '{Release} [{Platform}]' branch [{tag.Version}] {Versions.CurrentVersion}");
 
 		IO.ExecuteProcess("curl", $"-fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
 
@@ -141,7 +141,6 @@ public static class SelfUpdater
 				string destination = Path.Combine(Context.Game, reader.Entry.Key);
 				using EntryStream entry = reader.OpenEntryStream();
 				using var fs = new FileStream(destination, FileMode.OpenOrCreate);
-				Logger.Log($" - Updated {destination}");
 				entry.CopyTo(fs);
 			}
 		}
