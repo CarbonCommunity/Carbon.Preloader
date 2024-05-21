@@ -122,8 +122,9 @@ public static class SelfUpdater
 			return;
 		}
 
+		int filesRetouched = 0;
 		string url = GithubReleaseUrl();
-		Logger.Log($"Updating component 'Carbon' using the '{Release} [{Platform}]' branch [{tag.Version}] {Versions.CurrentVersion}");
+		Logger.Log($" Carbon{(IsMinimal ? " Minimal" : string.Empty)} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
 
 		IO.ExecuteProcess("curl", $"-fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
 
@@ -134,20 +135,21 @@ public static class SelfUpdater
 
 			while (reader.MoveToNextEntry())
 			{
-				// Logger.Log($" - Seeking {reader.Entry.Key} ?{reader.Entry.IsDirectory}");
-
-				if (!Files.Any(x => reader.Entry.Key.Contains(x))) continue;
+				if (reader.Entry.IsDirectory || !Files.Any(x => reader.Entry.Key.Contains(x))) continue;
 
 				string destination = Path.Combine(Context.Game, reader.Entry.Key);
 				using EntryStream entry = reader.OpenEntryStream();
 				using var fs = new FileStream(destination, FileMode.OpenOrCreate);
 				entry.CopyTo(fs);
+				filesRetouched++;
 			}
 		}
 		catch (Exception e)
 		{
 			Logger.Error($"Error while updating 'Carbon [{Platform}]'", e);
 		}
+
+		Logger.Log($" Carbon finished self-updating {filesRetouched:n0} files. You're now running the latest {Release} build.");
 	}
 
 	internal static bool GetCarbonVersions()
