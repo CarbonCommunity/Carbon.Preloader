@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -20,15 +21,20 @@ namespace Doorstop;
 [SuppressUnmanagedCodeSecurity]
 public sealed class Entrypoint
 {
-	private static readonly string[] Preload =
-	{
+	private static readonly string[] PreloadPreUpdate =
+	[
 		Path.Combine(Context.CarbonLib, "0Harmony.dll"),
 		Path.Combine(Context.CarbonLib, "Ben.Demystifier.dll"),
-		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll"),
-	};
+		Path.Combine(Context.CarbonLib, "SharpCompress.dll")
+	];
+
+	private static readonly string[] PreloadPostUpdate =
+	[
+		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll")
+	];
 
 	private static readonly string[] Delete =
-	{
+	[
 		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
 		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll"),
 		Context.CarbonReport,
@@ -42,7 +48,7 @@ public sealed class Entrypoint
 		Path.Combine(Context.GameManaged, "Oxide.Rust.dll"),
 		Path.Combine(Context.GameManaged, "Oxide.SQLite.dll"),
 		Path.Combine(Context.GameManaged, "Oxide.Unity.dll")
-	};
+	];
 
 	private static readonly Dictionary<KeyValuePair<string, string>, string> WildcardMove = new()
 	{
@@ -97,6 +103,58 @@ public sealed class Entrypoint
 	#endregion
 
 	public static void Start()
+	{
+		Config.Init();
+
+		foreach (string file in PreloadPreUpdate)
+		{
+			try
+			{
+				Assembly harmony = Assembly.LoadFile(file);
+				Logger.Log($" Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
+			}
+			catch (Exception e)
+			{
+				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
+			}
+		}
+		
+		if (Config.Singleton.SelfUpdating.Enabled)
+		{
+			SelfUpdater.Init();
+			SelfUpdater.GetCarbonVersions();
+
+			try
+			{
+				SelfUpdater.Execute();
+			}
+			catch (Exception ex)
+			{
+				Logger.Error("Failed self-updating process! Report to developers.", ex);
+			}
+		}
+		else
+		{
+			Logger.Log(" Skipped self-updating process due to disabled status.");
+		}
+
+		foreach (string file in PreloadPostUpdate)
+		{
+			try
+			{
+				Assembly harmony = Assembly.LoadFile(file);
+				Logger.Log($" Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
+			}
+			catch (Exception e)
+			{
+				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
+			}
+		}
+
+		PerformStartup();
+	}
+
+	public static void PerformStartup()
 	{
 		try
 		{
@@ -161,19 +219,6 @@ public sealed class Entrypoint
 			}
 
 			isolated6.Do.Write();
-		}
-
-		foreach (string file in Preload)
-		{
-			try
-			{
-				Assembly harmony = Assembly.LoadFile(file);
-				Logger.Log($" Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
-			}
-			catch (Exception e)
-			{
-				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
-			}
 		}
 
 		PerformMove();

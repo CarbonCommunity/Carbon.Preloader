@@ -18,7 +18,7 @@ internal sealed class Context
 
 	internal static readonly string
 		Game, GameManaged,
-		Carbon, CarbonManaged, CarbonLib, CarbonHooks, CarbonModules, CarbonExtensions, CarbonReport, CarbonHarmony, CarbonLogs, CarbonLang;
+		Carbon, CarbonManaged, CarbonLib, CarbonHooks, CarbonModules, CarbonExtensions, CarbonReport, CarbonHarmony, CarbonLogs, CarbonLang, CarbonTemp, CarbonConfig;
 
 	static Context()
 	{
@@ -65,6 +65,10 @@ internal sealed class Context
 			CarbonModules = Path.Combine(CarbonManaged, "modules");
 			if (!Directory.Exists(CarbonModules)) Directory.CreateDirectory(CarbonModules);
 
+			CarbonTemp = Path.Combine(Carbon, "temp");
+			if (!Directory.Exists(CarbonTemp)) Directory.CreateDirectory(CarbonTemp);
+
+			CarbonConfig = Path.Combine(Carbon, "config.json");
 			CarbonReport = Path.Combine(Carbon, "reports");
 		}
 		catch (System.Exception e)
