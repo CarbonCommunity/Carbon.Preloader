@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Carbon.Extensions;
-using Doorstop;
+using Bootstrap;
 using SharpCompress.Common;
 using SharpCompress.Readers;
 using SharpCompress.Readers.Zip;
@@ -117,7 +117,7 @@ public static class SelfUpdater
 
 		if (tag.Version.Equals(Versions.CurrentVersion))
 		{
-			Logger.Log($" Carbon {Target} is up to date, no self-updating necessary. Running {Release} build [{Versions.CurrentVersion}] on tag {Tag}.");
+			Logger.Log($" Carbon {Target} is up to date, no self-updating necessary. Running {Release} build [{Versions.CurrentVersion}] on tag '{Tag}'.");
 			return;
 		}
 
