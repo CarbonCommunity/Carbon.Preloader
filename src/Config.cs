@@ -10,7 +10,7 @@ using Utility;
  *
  */
 
-namespace Doorstop;
+namespace Bootstrap;
 
 [Serializable]
 public class Config

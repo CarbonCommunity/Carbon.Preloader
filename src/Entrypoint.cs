@@ -6,6 +6,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
+using Bootstrap;
 using Patches;
 using Utility;
 
@@ -118,7 +119,7 @@ public sealed class Entrypoint
 				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
 			}
 		}
-		
+
 		if (Config.Singleton.SelfUpdating.Enabled)
 		{
 			SelfUpdater.Init();

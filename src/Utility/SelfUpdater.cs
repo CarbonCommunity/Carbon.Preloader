@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Security;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Doorstop;
+using Carbon.Extensions;
+using Bootstrap;
 using SharpCompress.Common;
 using SharpCompress.Readers;
+using SharpCompress.Readers.Zip;
 
 namespace Utility;
 
@@ -24,6 +20,8 @@ namespace Utility;
 
 public static class SelfUpdater
 {
+	internal static readonly Random Random = new();
+
 	internal static OsType Platform;
 	internal static ReleaseType Release;
 	internal static string Repository;
@@ -90,7 +88,7 @@ public static class SelfUpdater
 #elif PROD
 		ReleaseType.Production;
 #else
-			ReleaseType.Edge;
+		ReleaseType.Edge;
 #endif
 
 		IsMinimal =
@@ -107,6 +105,7 @@ public static class SelfUpdater
 		"Debug";
 #endif
 	}
+
 	internal static void Execute()
 	{
 		var tag = Versions.GetVersion(Tag);
@@ -118,38 +117,47 @@ public static class SelfUpdater
 
 		if (tag.Version.Equals(Versions.CurrentVersion))
 		{
-			Logger.Log($" Carbon is up to date. No self-updating necessary.");
+			Logger.Log($" Carbon {Target} is up to date, no self-updating necessary. Running {Release} build [{Versions.CurrentVersion}] on tag '{Tag}'.");
 			return;
 		}
 
-		int filesRetouched = 0;
-		string url = GithubReleaseUrl();
-		Logger.Log($" Carbon{(IsMinimal ? " Minimal" : string.Empty)} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
+		var url = GithubReleaseUrl();
+		Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
 
 		IO.ExecuteProcess("curl", $"-fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
+
+		var count = 0;
 
 		try
 		{
 			using FileStream archive = System.IO.File.OpenRead(Path.Combine(Context.CarbonTemp, "patch.zip"));
 			using IReader reader = ReaderFactory.Open(archive);
-
-			while (reader.MoveToNextEntry())
 			{
-				if (reader.Entry.IsDirectory || !Files.Any(x => reader.Entry.Key.Contains(x))) continue;
+				Console.Write($" Updating Carbon... ");
 
-				string destination = Path.Combine(Context.Game, reader.Entry.Key);
-				using EntryStream entry = reader.OpenEntryStream();
-				using var fs = new FileStream(destination, FileMode.OpenOrCreate);
-				entry.CopyTo(fs);
-				filesRetouched++;
+				while (reader.MoveToNextEntry())
+				{
+					var entry = reader.Entry;
+
+					if (entry.IsDirectory || !Files.Any(x => entry.Key.Contains(x))) continue;
+
+					var destination = Path.Combine(Context.Game, entry.Key);
+					using var fileStream = new FileStream(destination, FileMode.OpenOrCreate);
+					using var entryStream = reader.OpenEntryStream();
+					entryStream.CopyTo(fileStream);
+
+					Console.Write($"{Environment.NewLine} - {entry.Key} ({ByteEx.Format(entry.Size).ToUpper()})");
+					count++;
+				}
 			}
+			Console.WriteLine(string.Empty);
 		}
 		catch (Exception e)
 		{
 			Logger.Error($"Error while updating 'Carbon [{Platform}]'", e);
 		}
 
-		Logger.Log($" Carbon finished self-updating {filesRetouched:n0} files. You're now running the latest {Release} build.");
+		Logger.Log($" Carbon {Target} finished self-updating {count:n0} files. You're now running the latest {Release} build.");
 	}
 
 	internal static bool GetCarbonVersions()
