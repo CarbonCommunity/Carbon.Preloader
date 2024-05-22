@@ -11,7 +11,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Utility;
 
-namespace Doorstop;
+namespace Bootstrap;
 
 public class Versions
 {
