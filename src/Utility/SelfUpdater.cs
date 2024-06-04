@@ -133,7 +133,7 @@ public static class SelfUpdater
 			using FileStream archive = System.IO.File.OpenRead(Path.Combine(Context.CarbonTemp, "patch.zip"));
 			using IReader reader = ReaderFactory.Open(archive);
 			{
-				Console.Write($" Updating Carbon... ");
+				Console.Write(" Updating Carbon... ");
 
 				while (reader.MoveToNextEntry())
 				{
