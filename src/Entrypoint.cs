@@ -122,11 +122,10 @@ public sealed class Entrypoint
 
 		if (Config.Singleton.SelfUpdating.Enabled)
 		{
-			SelfUpdater.Init();
-			SelfUpdater.GetCarbonVersions();
-
 			try
 			{
+				SelfUpdater.Init();
+				SelfUpdater.GetCarbonVersions();
 				SelfUpdater.Execute();
 			}
 			catch (Exception ex)
@@ -136,7 +135,7 @@ public sealed class Entrypoint
 		}
 		else
 		{
-			Logger.Log(" Skipped self-updating process due to disabled status.");
+			Logger.Log(" Skipped self-updating process as it's disabled in the config.");
 		}
 
 		foreach (string file in PreloadPostUpdate)
