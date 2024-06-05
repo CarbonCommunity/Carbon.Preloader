@@ -20,28 +20,28 @@ namespace Utility;
 
 public static class SelfUpdater
 {
-	internal static readonly Random Random = new();
+	private const string Repository = "CarbonCommunity/Carbon";
+	private const string CarbonVersionsEndpoint = "https://carbonmod.gg/api";
 
-	internal static OsType Platform;
-	internal static ReleaseType Release;
-	internal static string Repository;
-	internal static string Target;
-	internal static bool IsMinimal;
-	internal static readonly string[] Files =
+	private static OsType Platform;
+	private static ReleaseType Release;
+	private static string Target;
+	private static bool IsMinimal;
+	private static readonly string[] Files =
 	[
-		@"carbon/managed/Carbon.dll",
-		@"carbon/managed/Carbon.Common.dll",
-		@"carbon/managed/Carbon.Common.Client.dll",
-		@"carbon/managed/Carbon.Bootstrap.dll",
-		@"carbon/managed/Carbon.Compat.dll",
-		@"carbon/managed/Carbon.Preloader.dll",
-		@"carbon/managed/Carbon.SDK.dll",
-		@"carbon/managed/hooks/Carbon.Hooks.Base.dll",
-		@"carbon/managed/lib",
-		@"carbon/managed/modules",
-		@"carbon/native/CarbonNative.dll"
+		"carbon/managed/Carbon.dll",
+		"carbon/managed/Carbon.Common.dll",
+		"carbon/managed/Carbon.Common.Client.dll",
+		"carbon/managed/Carbon.Bootstrap.dll",
+		"carbon/managed/Carbon.Compat.dll",
+		"carbon/managed/Carbon.Preloader.dll",
+		"carbon/managed/Carbon.SDK.dll",
+		"carbon/managed/hooks/Carbon.Hooks.Base.dll",
+		"carbon/managed/lib",
+		"carbon/managed/modules",
+		"carbon/native/CarbonNative.dll"
 	];
-	internal static string Tag => Release switch
+	private static string Tag => Release switch
 	{
 		ReleaseType.Edge => "edge_build",
 		ReleaseType.Preview => "preview_build",
@@ -52,17 +52,15 @@ public static class SelfUpdater
 		ReleaseType.Production => "production_build",
 		_ => throw new ArgumentOutOfRangeException()
 	};
-	internal static string File => Platform switch
+	private static string File => Platform switch
 	{
 		OsType.Windows => $"Carbon.Windows.{Target}.zip",
 		OsType.Linux => $"Carbon.Linux.{Target}.tar.gz",
 		_ => throw new ArgumentOutOfRangeException()
 	};
 
-	public enum OsType { Windows, Linux }
-	public enum ReleaseType { Edge, Preview, Release, Staging, Aux01, Aux02, Production }
-
-	public const string CarbonVersionsEndpoint = "https://carbonmod.gg/api";
+	private enum OsType { Windows, Linux }
+	private enum ReleaseType { Edge, Preview, Release, Staging, Aux01, Aux02, Production }
 
 	internal static void Init()
 	{
@@ -71,8 +69,6 @@ public static class SelfUpdater
 			true => OsType.Windows,
 			false => OsType.Linux
 		};
-
-		Repository = @"CarbonCommunity/Carbon";
 
 		Release =
 #if PREVIEW
