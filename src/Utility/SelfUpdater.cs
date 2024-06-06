@@ -96,7 +96,7 @@ public static class SelfUpdater
 
 		Target = IsMinimal ? "Minimal" :
 #if PROD
-		"Release"
+		"Release";
 #else
 		"Debug";
 #endif
