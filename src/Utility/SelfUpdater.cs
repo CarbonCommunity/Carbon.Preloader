@@ -45,10 +45,10 @@ public static class SelfUpdater
 	{
 		ReleaseType.Edge => "edge_build",
 		ReleaseType.Preview => "preview_build",
-		ReleaseType.Release => "release_build",
-		ReleaseType.Staging => "rustbeta_staging_build",
-		ReleaseType.Aux01 => "rustbeta_aux01_build",
-		ReleaseType.Aux02 => "rustbeta_aux02_build",
+		ReleaseType.RustRelease => "rustbeta_release_build",
+		ReleaseType.RustStaging => "rustbeta_staging_build",
+		ReleaseType.RustAux01 => "rustbeta_aux01_build",
+		ReleaseType.RustAux02 => "rustbeta_aux02_build",
 		ReleaseType.Production => "production_build",
 		_ => throw new ArgumentOutOfRangeException()
 	};
@@ -60,7 +60,7 @@ public static class SelfUpdater
 	};
 
 	private enum OsType { Windows, Linux }
-	private enum ReleaseType { Edge, Preview, Release, Staging, Aux01, Aux02, Production }
+	private enum ReleaseType { Edge, Preview, RustRelease, RustStaging, RustAux01, RustAux02, Production }
 
 	internal static void Init()
 	{
@@ -71,18 +71,18 @@ public static class SelfUpdater
 		};
 
 		Release =
-#if PREVIEW
-		ReleaseType.Preview;
-#elif RELEASE
-		ReleaseType.Release;
-#elif STAGING
-		ReleaseType.Staging;
-#elif AUX01
-		ReleaseType.Aux01;
-#elif AUX02
-		ReleaseType.Aux02;
-#elif PROD
+#if PROD
 		ReleaseType.Production;
+#elif PREVIEW
+		ReleaseType.Preview;
+#elif RUST_STAGING
+		ReleaseType.RustStaging;
+#elif RUST_RELEASE
+		ReleaseType.RustRelease;
+#elif RUST_AUX01
+		ReleaseType.RustAux01;
+#elif RUST_AUX02
+		ReleaseType.RustAux02;
 #else
 		ReleaseType.Edge;
 #endif
