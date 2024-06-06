@@ -45,7 +45,6 @@ public static class SelfUpdater
 	{
 		ReleaseType.Edge => "edge_build",
 		ReleaseType.Preview => "preview_build",
-		ReleaseType.Release => "release_build",
 		ReleaseType.Staging => "rustbeta_staging_build",
 		ReleaseType.Aux01 => "rustbeta_aux01_build",
 		ReleaseType.Aux02 => "rustbeta_aux02_build",
@@ -60,7 +59,7 @@ public static class SelfUpdater
 	};
 
 	private enum OsType { Windows, Linux }
-	private enum ReleaseType { Edge, Preview, Release, Staging, Aux01, Aux02, Production }
+	private enum ReleaseType { Edge, Preview, Staging, Aux01, Aux02, Production }
 
 	internal static void Init()
 	{
@@ -71,18 +70,16 @@ public static class SelfUpdater
 		};
 
 		Release =
-#if PREVIEW
+#if PROD
+		ReleaseType.Production;
+#elif PREVIEW
 		ReleaseType.Preview;
-#elif RELEASE
-		ReleaseType.Release;
 #elif STAGING
 		ReleaseType.Staging;
 #elif AUX01
 		ReleaseType.Aux01;
 #elif AUX02
 		ReleaseType.Aux02;
-#elif PROD
-		ReleaseType.Production;
 #else
 		ReleaseType.Edge;
 #endif
