@@ -36,6 +36,7 @@ public static class SelfUpdater
 		"carbon/managed/Carbon.Compat.dll",
 		"carbon/managed/Carbon.Preloader.dll",
 		"carbon/managed/Carbon.SDK.dll",
+		"carbon/managed/Carbon.Test.dll",
 		"carbon/managed/hooks/Carbon.Hooks.Base.dll",
 		"carbon/managed/lib",
 		"carbon/managed/modules",
