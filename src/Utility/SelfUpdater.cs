@@ -29,17 +29,7 @@ public static class SelfUpdater
 	private static bool IsMinimal;
 	private static readonly string[] Files =
 	[
-		"carbon/managed/Carbon.dll",
-		"carbon/managed/Carbon.Common.dll",
-		"carbon/managed/Carbon.Common.Client.dll",
-		"carbon/managed/Carbon.Bootstrap.dll",
-		"carbon/managed/Carbon.Compat.dll",
-		"carbon/managed/Carbon.Preloader.dll",
-		"carbon/managed/Carbon.SDK.dll",
-		"carbon/managed/Carbon.Test.dll",
-		"carbon/managed/hooks/Carbon.Hooks.Base.dll",
-		"carbon/managed/lib",
-		"carbon/managed/modules",
+		"carbon/managed",
 		"carbon/native/CarbonNative.dll"
 	];
 	private static string Tag => Release switch
