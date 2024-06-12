@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
-using Utility;
+using Doorstop.Utility;
 
 /*
  *
@@ -10,7 +10,7 @@ using Utility;
  *
  */
 
-namespace Bootstrap;
+namespace Doorstop;
 
 [Serializable]
 public class Config

@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
-using Mono.Collections.Generic;
-using Utility;
-
+﻿
 /*
  *
  * Copyright (c) 2022-2024 Carbon Community
@@ -15,7 +6,14 @@ using Utility;
  *
  */
 
-namespace Patches;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Mono.Cecil;
+using Doorstop.Utility;
+
+namespace Doorstop.Patches;
 
 internal sealed class FacepunchNetwork : MarshalByRefObject
 {
