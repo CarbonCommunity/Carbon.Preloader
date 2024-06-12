@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
-using Bootstrap;
-using Patches;
-using Utility;
+using Doorstop.Patches;
+using Doorstop.Utility;
 
 /*
  *

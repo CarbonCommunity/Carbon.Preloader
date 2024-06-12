@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Carbon.Extensions;
-using Bootstrap;
-using SharpCompress.Common;
 using SharpCompress.Readers;
-using SharpCompress.Readers.Zip;
 
-namespace Utility;
+namespace Doorstop.Utility;
 
 /*
  *

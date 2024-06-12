@@ -9,9 +9,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
-using Utility;
+using Doorstop.Utility;
 
-namespace Bootstrap;
+namespace Doorstop;
 
 public class Versions
 {

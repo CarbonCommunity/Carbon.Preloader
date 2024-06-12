@@ -7,7 +7,7 @@
  *
  */
 
-namespace Utility;
+namespace Doorstop.Utility;
 
 internal static class Blacklist
 {
