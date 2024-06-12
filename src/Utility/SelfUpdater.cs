@@ -107,7 +107,7 @@ public static class SelfUpdater
 		var url = GithubReleaseUrl();
 		Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
 
-		IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-cache\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
+		IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
 
 		var count = 0;
 
@@ -146,7 +146,7 @@ public static class SelfUpdater
 	internal static bool GetCarbonVersions()
 	{
 		var tempPath = Path.Combine(Context.CarbonTemp, "versions.json");
-		var gotVersions = IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-cache\" -H \"Pragma: no-cache\" -fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
+		var gotVersions = IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
 
 		return gotVersions && Versions.Init(System.IO.File.ReadAllText(tempPath));
 	}
