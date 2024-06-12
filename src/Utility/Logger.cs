@@ -10,7 +10,7 @@ using System.Reflection;
  *
  */
 
-namespace Utility;
+namespace Doorstop.Utility;
 
 internal sealed class Logger
 {
