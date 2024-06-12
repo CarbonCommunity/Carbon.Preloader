@@ -2,12 +2,12 @@
 
 /*
  *
- * Copyright (c) 2022-2024 Carbon Community 
+ * Copyright (c) 2022-2024 Carbon Community
  * All rights reserved.
  *
  */
 
-namespace Utility;
+namespace Doorstop.Utility;
 
 [Serializable]
 public sealed class Sandbox<T> : IDisposable where T : MarshalByRefObject
@@ -26,7 +26,7 @@ public sealed class Sandbox<T> : IDisposable where T : MarshalByRefObject
 		AppDomainSetup domaininfo = new AppDomainSetup
 		{
 			// this is still not perfect but it let's run with it for now.. ideally
-			// the sandbox should be able to resolve their load requests using the 
+			// the sandbox should be able to resolve their load requests using the
 			// domain assembly resolver event
 			ApplicationBase = Context.CarbonManaged
 		};

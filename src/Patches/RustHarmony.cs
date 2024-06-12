@@ -1,18 +1,18 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Utility;
-
-/*
+﻿/*
  *
  * Copyright (c) 2022-2024 Carbon Community
  * All rights reserved.
  *
  */
 
-namespace Patches;
+using System;
+using System.IO;
+using System.Linq;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Doorstop.Utility;
+
+namespace Doorstop.Patches;
 #pragma warning disable IDE0051
 
 internal sealed class RustHarmony : MarshalByRefObject
