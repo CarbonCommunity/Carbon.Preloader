@@ -4,12 +4,12 @@ using System.Security.Cryptography;
 
 /*
  *
- * Copyright (c) 2022-2024 Carbon Community 
+ * Copyright (c) 2022-2024 Carbon Community
  * All rights reserved.
  *
  */
 
-namespace Utility;
+namespace Doorstop.Utility;
 
 internal static class Crypto
 {

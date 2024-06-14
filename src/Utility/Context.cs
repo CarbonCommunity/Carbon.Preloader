@@ -9,7 +9,7 @@ using Carbon.Extensions;
  *
  */
 
-namespace Utility;
+namespace Doorstop.Utility;
 
 internal sealed class Context
 {
