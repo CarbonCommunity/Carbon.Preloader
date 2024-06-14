@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Carbon.Extensions;
-using Bootstrap;
-using SharpCompress.Common;
 using SharpCompress.Readers;
-using SharpCompress.Readers.Zip;
 
-namespace Utility;
+namespace Doorstop.Utility;
 
 /*
  *
@@ -29,16 +25,7 @@ public static class SelfUpdater
 	private static bool IsMinimal;
 	private static readonly string[] Files =
 	[
-		"carbon/managed/Carbon.dll",
-		"carbon/managed/Carbon.Common.dll",
-		"carbon/managed/Carbon.Common.Client.dll",
-		"carbon/managed/Carbon.Bootstrap.dll",
-		"carbon/managed/Carbon.Compat.dll",
-		"carbon/managed/Carbon.Preloader.dll",
-		"carbon/managed/Carbon.SDK.dll",
-		"carbon/managed/hooks/Carbon.Hooks.Base.dll",
-		"carbon/managed/lib",
-		"carbon/managed/modules",
+		"carbon/managed",
 		"carbon/native/CarbonNative.dll"
 	];
 	private static string Tag => Release switch
@@ -120,7 +107,7 @@ public static class SelfUpdater
 		var url = GithubReleaseUrl();
 		Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
 
-		IO.ExecuteProcess("curl", $"-fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
+		IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
 
 		var count = 0;
 
@@ -159,7 +146,7 @@ public static class SelfUpdater
 	internal static bool GetCarbonVersions()
 	{
 		var tempPath = Path.Combine(Context.CarbonTemp, "versions.json");
-		var gotVersions = IO.ExecuteProcess("curl", $"-fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
+		var gotVersions = IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
 
 		return gotVersions && Versions.Init(System.IO.File.ReadAllText(tempPath));
 	}
