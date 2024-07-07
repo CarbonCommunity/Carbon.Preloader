@@ -36,6 +36,8 @@ public sealed class Entrypoint
 	[
 		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
 		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll"),
+		Path.Combine(Context.CarbonManaged, "Carbon.Common.Client.dll"),
+		Path.Combine(Context.Carbon, "config.client.json"),
 		Context.CarbonReport,
 		Path.Combine(Context.GameManaged, "x64"),
 		Path.Combine(Context.GameManaged, "x86"),
@@ -236,14 +238,14 @@ public sealed class Entrypoint
 				{
 					if (Directory.Exists(path))
 					{
-						Logger.Log($" Removed '{Path.GetFileName(path)}' from RustDedicated_Data/Managed");
+						Logger.Log($" Removed '{Path.GetFileName(path)}'");
 						Directory.Delete(path, true);
 					}
 
 					continue;
 				}
 
-				Logger.Log($" Removed '{Path.GetFileName(path)}' from RustDedicated_Data/Managed");
+				Logger.Log($" Removed '{Path.GetFileName(path)}'");
 				File.Delete(path);
 			}
 			catch (Exception ex)
