@@ -171,6 +171,8 @@ public sealed class Entrypoint
 
 		using Sandbox<AssemblyCSharp> isolated1 = new Sandbox<AssemblyCSharp>();
 		{
+			isolated1.Do.Init();
+
 			if (!isolated1.Do.IsPublic("ServerMgr", "Shutdown"))
 			{
 				isolated1.Do.Publicize();
@@ -182,18 +184,22 @@ public sealed class Entrypoint
 
 		using Sandbox<RustHarmony> isolated2 = new Sandbox<RustHarmony>();
 		{
+			isolated2.Do.Init();
 			isolated2.Do.Patch();
 			isolated2.Do.Write();
 		}
 
 		using Sandbox<FacepunchConsole> isolated3 = new Sandbox<FacepunchConsole>();
 		{
+			isolated3.Do.Init();
 			isolated3.Do.Patch();
 			isolated3.Do.Write();
 		}
 
 		using Sandbox<FacepunchNetwork> isolated4 = new Sandbox<FacepunchNetwork>();
 		{
+			isolated4.Do.Init();
+
 			if (!isolated4.Do.IsPublic("Networkable", "sv"))
 			{
 				isolated4.Do.Publicize();
@@ -204,6 +210,8 @@ public sealed class Entrypoint
 
 		using Sandbox<RustClansLocal> isolated5 = new Sandbox<RustClansLocal>();
 		{
+			isolated5.Do.Init();
+
 			if (!isolated5.Do.IsPublic("LocalClanDatabase"))
 			{
 				isolated5.Do.Publicize();
@@ -214,6 +222,8 @@ public sealed class Entrypoint
 
 		using Sandbox<FacepunchNexus> isolated6 = new Sandbox<FacepunchNexus>();
 		{
+			isolated6.Do.Init();
+
 			if (!isolated6.Do.IsPublic("Util"))
 			{
 				isolated6.Do.Publicize();

@@ -19,26 +19,26 @@ namespace Doorstop.Patches;
 
 internal sealed class AssemblyCSharp : MarshalByRefObject
 {
-	private static readonly DefaultAssemblyResolver _resolver;
-	private readonly Dictionary<string, string> _checksums = new();
-	private readonly AssemblyDefinition _assembly;
+	private static DefaultAssemblyResolver _resolver;
+	private AssemblyDefinition _assembly;
 	private string _filename;
 
-	static AssemblyCSharp()
-	{
-		_resolver = new DefaultAssemblyResolver();
-		_resolver.AddSearchDirectory(Defines.GetLibFolder());
-		_resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
-		_resolver.AddSearchDirectory(Defines.GetManagedFolder());
-		_resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
-	}
-
-	public AssemblyCSharp()
+	public void Init()
 	{
 		_filename = Path.Combine(Defines.GetRustManagedFolder(), "Assembly-CSharp.dll");
 
 		if (!File.Exists(_filename))
 			throw new Exception($"Assembly file '{_filename}' was not found");
+
+		_resolver = new DefaultAssemblyResolver();
+		_resolver.AddSearchDirectory(Defines.GetLibFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedFolder());
+		_resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
+		foreach (var search in _resolver.GetSearchDirectories())
+    	{
+    		Console.WriteLine($"AssemblyCSharp Searching : {search}");
+    	}
 
 		_assembly = AssemblyDefinition.ReadAssembly(_filename,
 			parameters: new ReaderParameters { AssemblyResolver = _resolver });
@@ -48,7 +48,7 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 	{
 		try
 		{
-			if (_assembly == null) throw new Exception("Loaded assembly is null");
+			if (_assembly == null) throw new Exception($"Loaded assembly is null: {_filename}");
 
 			TypeDefinition t = _assembly.MainModule.Types.First(x => x.Name == Type);
 			if (t == null) throw new Exception($"Unable to get type definition for '{Type}'");
@@ -67,7 +67,7 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 
 	internal void Publicize()
 	{
-		if (_assembly == null) throw new Exception("Loaded assembly is null");
+		if (_assembly == null) throw new Exception($"Loaded assembly is null: {_filename}");
 
 		Logger.Debug($" - Publicize assembly");
 
