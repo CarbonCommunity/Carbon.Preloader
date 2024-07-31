@@ -30,7 +30,7 @@ public sealed class Entrypoint
 
 	private static readonly string[] PreloadPostUpdate =
 	[
-		Path.Combine(Defines.GetManagedFolder(), "Carbon.Compat.dll")
+		Path.GetFullPath(Path.Combine(Defines.GetManagedFolder(), "Carbon.Compat.dll"))
 	];
 
 	private static readonly string[] Delete =
@@ -232,11 +232,18 @@ public sealed class Entrypoint
 			isolated6.Do.Write();
 		}
 
-		PerformMove();
-		PerformWildcardMove();
-		PerformRename();
-		PerformCleanup();
-		PerformCopyTargetEmpty();
+		try
+		{
+			PerformMove();
+			PerformWildcardMove();
+			PerformRename();
+			PerformCleanup();
+			PerformCopyTargetEmpty();
+		}
+		catch (Exception ex)
+		{
+			Logger.Error("Preloader fatal failure", ex);
+		}
 	}
 
 	public static void PerformCleanup()
@@ -279,8 +286,15 @@ public sealed class Entrypoint
 					continue;
 				}
 
+				var destination = Path.Combine(fileWildcard.Value, Path.GetFileName(file));
+
+				if (File.Exists(destination))
+				{
+					continue;
+				}
+
+				File.Move(file, destination);
 				Logger.Log($" Moved {Path.GetFileName(file)} -> carbon/{Path.GetFileName(fileWildcard.Value)}");
-				File.Move(file, $"{Path.Combine(fileWildcard.Value, Path.GetFileName(file))}");
 			}
 		}
 	}
