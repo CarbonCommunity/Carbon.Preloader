@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Carbon.Core;
 using Mono.Cecil;
 using Doorstop.Utility;
 
@@ -24,15 +25,15 @@ internal sealed class RustClansLocal : MarshalByRefObject
 	static RustClansLocal()
 	{
 		_resolver = new DefaultAssemblyResolver();
-		_resolver.AddSearchDirectory(Context.CarbonLib);
-		_resolver.AddSearchDirectory(Context.CarbonModules);
-		_resolver.AddSearchDirectory(Context.CarbonManaged);
-		_resolver.AddSearchDirectory(Context.GameManaged);
+		_resolver.AddSearchDirectory(Defines.GetLibFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedFolder());
+		_resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
 	}
 
 	public RustClansLocal()
 	{
-		_filename = Path.Combine(Context.GameManaged, "Rust.Clans.Local.dll");
+		_filename = Path.Combine(Defines.GetRustManagedFolder(), "Rust.Clans.Local.dll");
 
 		if (!File.Exists(_filename))
 			throw new Exception($"Assembly file '{_filename}' was not found");

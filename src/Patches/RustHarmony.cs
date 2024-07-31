@@ -8,6 +8,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Carbon.Core;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Doorstop.Utility;
@@ -24,15 +25,15 @@ internal sealed class RustHarmony : MarshalByRefObject
 	static RustHarmony()
 	{
 		_resolver = new DefaultAssemblyResolver();
-		_resolver.AddSearchDirectory(Context.CarbonLib);
-		_resolver.AddSearchDirectory(Context.CarbonModules);
-		_resolver.AddSearchDirectory(Context.CarbonManaged);
-		_resolver.AddSearchDirectory(Context.GameManaged);
+		_resolver.AddSearchDirectory(Defines.GetLibFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedFolder());
+		_resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
 	}
 
 	public RustHarmony()
 	{
-		_filename = Path.Combine(Context.GameManaged, "Rust.Harmony.dll");
+		_filename = Path.Combine(Defines.GetRustManagedFolder(), "Rust.Harmony.dll");
 
 		if (!File.Exists(_filename))
 			throw new Exception($"Assembly file '{_filename}' was not found");

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Carbon.Core;
 using Carbon.Extensions;
 using SharpCompress.Readers;
 
@@ -107,13 +108,13 @@ public static class SelfUpdater
 		var url = GithubReleaseUrl();
 		Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
 
-		IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Context.CarbonTemp, "patch.zip")}\" \"{url}\"");
+		IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Defines.GetTempFolder(), "patch.zip")}\" \"{url}\"");
 
 		var count = 0;
 
 		try
 		{
-			using FileStream archive = System.IO.File.OpenRead(Path.Combine(Context.CarbonTemp, "patch.zip"));
+			using FileStream archive = System.IO.File.OpenRead(Path.Combine(Defines.GetTempFolder(), "patch.zip"));
 			using IReader reader = ReaderFactory.Open(archive);
 			{
 				Console.Write(" Updating Carbon... ");
@@ -124,7 +125,7 @@ public static class SelfUpdater
 
 					if (entry.IsDirectory || !Files.Any(x => entry.Key.Contains(x))) continue;
 
-					var destination = Path.Combine(Context.Game, entry.Key);
+					var destination = Path.Combine(Defines.GetRustRootFolder(), entry.Key);
 					using var fileStream = new FileStream(destination, FileMode.OpenOrCreate);
 					using var entryStream = reader.OpenEntryStream();
 					entryStream.CopyTo(fileStream);
@@ -145,7 +146,7 @@ public static class SelfUpdater
 
 	internal static bool GetCarbonVersions()
 	{
-		var tempPath = Path.Combine(Context.CarbonTemp, "versions.json");
+		var tempPath = Path.Combine(Defines.GetTempFolder(), "versions.json");
 		var gotVersions = IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
 
 		return gotVersions && Versions.Init(System.IO.File.ReadAllText(tempPath));

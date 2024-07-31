@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Carbon.Core;
 using Newtonsoft.Json;
 using Doorstop.Utility;
 
@@ -31,12 +32,12 @@ public class Config
 			return;
 		}
 
-		if (!File.Exists(Context.CarbonConfig))
+		if (!File.Exists(Defines.GetConfigFile()))
 		{
 			Singleton = new();
 			return;
 		}
 
-		Singleton = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Context.CarbonConfig));
+		Singleton = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Defines.GetConfigFile()));
 	}
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
+using Carbon.Core;
 using Doorstop.Patches;
 using Doorstop.Utility;
 
@@ -22,59 +23,58 @@ public sealed class Entrypoint
 {
 	private static readonly string[] PreloadPreUpdate =
 	[
-		Path.Combine(Context.CarbonLib, "0Harmony.dll"),
-		Path.Combine(Context.CarbonLib, "Ben.Demystifier.dll"),
-		Path.Combine(Context.CarbonLib, "SharpCompress.dll")
+		Path.Combine(Defines.GetLibFolder(), "0Harmony.dll"),
+		Path.Combine(Defines.GetLibFolder(), "Ben.Demystifier.dll"),
+		Path.Combine(Defines.GetLibFolder(), "SharpCompress.dll")
 	];
 
 	private static readonly string[] PreloadPostUpdate =
 	[
-		Path.Combine(Context.CarbonManaged, "Carbon.Compat.dll")
+		Path.Combine(Defines.GetManagedFolder(), "Carbon.Compat.dll")
 	];
 
 	private static readonly string[] Delete =
 	[
-		Path.Combine(Context.CarbonExtensions, "CCLBootstrap.dll"),
-		Path.Combine(Context.CarbonExtensions, "Carbon.Ext.Discord.dll"),
-		Path.Combine(Context.CarbonManaged, "Carbon.Common.Client.dll"),
-		Path.Combine(Context.Carbon, "config.client.json"),
-		Context.CarbonReport,
-		Path.Combine(Context.GameManaged, "x64"),
-		Path.Combine(Context.GameManaged, "x86"),
-		Path.Combine(Context.GameManaged, "Oxide.Common.dll"),
-		Path.Combine(Context.GameManaged, "Oxide.Core.dll"),
-		Path.Combine(Context.GameManaged, "Oxide.CSharp.dll"),
-		Path.Combine(Context.GameManaged, "Oxide.MySql.dll"),
-		Path.Combine(Context.GameManaged, "Oxide.References.dll"),
-		Path.Combine(Context.GameManaged, "Oxide.Rust.dll"),
-		Path.Combine(Context.GameManaged, "Oxide.SQLite.dll"),
-		Path.Combine(Context.GameManaged, "Oxide.Unity.dll")
+		Path.Combine(Defines.GetExtensionsFolder(), "CCLBootstrap.dll"),
+		Path.Combine(Defines.GetExtensionsFolder(), "Carbon.Ext.Discord.dll"),
+		Path.Combine(Defines.GetManagedFolder(), "Carbon.Common.Client.dll"),
+		Path.Combine(Defines.GetRootFolder(), "config.client.json"),
+		Path.Combine(Defines.GetRustManagedFolder(), "x64"),
+		Path.Combine(Defines.GetRustManagedFolder(), "x86"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.Common.dll"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.Core.dll"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.CSharp.dll"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.MySql.dll"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.References.dll"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.Rust.dll"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.SQLite.dll"),
+		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.Unity.dll")
 	];
 
 	private static readonly Dictionary<KeyValuePair<string, string>, string> WildcardMove = new()
 	{
-		[new KeyValuePair<string, string>(Context.GameManaged, "Oxide.Ext.")] = Path.Combine(Context.CarbonExtensions)
+		[new KeyValuePair<string, string>(Defines.GetRustManagedFolder(), "Oxide.Ext.")] = Path.Combine(Defines.GetExtensionsFolder())
 	};
 
 	private static readonly Dictionary<string, string> CopyTargetEmpty = new()
 	{
-		[Path.Combine(Context.Game, "oxide", "config")] = Path.Combine(Context.Carbon, "configs"),
-		[Path.Combine(Context.Game, "oxide", "data")] = Path.Combine(Context.Carbon, "data"),
-		[Path.Combine(Context.Game, "oxide", "plugins")] = Path.Combine(Context.Carbon, "plugins"),
-		[Path.Combine(Context.Game, "oxide", "lang")] = Path.Combine(Context.Carbon, "lang")
+		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "config")] = Path.Combine(Defines.GetRootFolder(), "configs"),
+		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "data")] = Path.Combine(Defines.GetRootFolder(), "data"),
+		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "plugins")] = Path.Combine(Defines.GetRootFolder(), "plugins"),
+		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "lang")] = Path.Combine(Defines.GetRootFolder(), "lang")
 	};
 
 	private static readonly Dictionary<string, string> Move = new()
 	{
-		[Path.Combine(Context.Carbon, "CCL", "oxide")] = Path.Combine(Context.CarbonExtensions),
-		[Path.Combine(Context.Carbon, "CCL", "harmony")] = Path.Combine(Context.CarbonHarmony)
+		[Path.Combine(Defines.GetRootFolder(), "CCL", "oxide")] = Path.Combine(Defines.GetExtensionsFolder()),
+		[Path.Combine(Defines.GetRootFolder(), "CCL", "harmony")] = Path.Combine(Defines.GetHarmonyFolder())
 	};
 
 	private static readonly Dictionary<string, string> Rename = new()
 	{
-		[Path.Combine(Context.Carbon, "config_client.json")] = Path.Combine(Context.Carbon, "config.client.json"),
-		[Path.Combine(Context.Carbon, "carbonauto.cfg")] = Path.Combine(Context.Carbon, "config.auto.json"),
-		[Path.Combine(Context.Carbon, "config.auto.cfg")] = Path.Combine(Context.Carbon, "config.auto.json")
+		[Path.Combine(Defines.GetRootFolder(), "config_client.json")] = Path.Combine(Defines.GetRootFolder(), "config.client.json"),
+		[Path.Combine(Defines.GetRootFolder(), "carbonauto.cfg")] = Path.Combine(Defines.GetRootFolder(), "config.auto.json"),
+		[Path.Combine(Defines.GetRootFolder(), "config.auto.cfg")] = Path.Combine(Defines.GetRootFolder(), "config.auto.json")
 	};
 
 	#region Native MonoProfiler
@@ -88,12 +88,12 @@ public sealed class Entrypoint
 	public static unsafe void InitNative()
 	{
 #if UNIX
-        mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "libCarbonNative.so"), null);
+        mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Defines.GetRootFolder(), "native", "libCarbonNative.so"), null);
 #elif WIN
-		mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Context.Carbon, "native", "CarbonNative.dll"), null);
+		mono_dllmap_insert(ModuleHandle.EmptyHandle, "CarbonNative", null, Path.Combine(Defines.GetRootFolder(), "native", "CarbonNative.dll"), null);
 #endif
 
-		var path = Path.Combine(Context.Carbon, "config.profiler.json");
+		var path = Path.Combine(Defines.GetRootFolder(), "config.profiler.json");
 
 		fixed (char* ptr = path)
 		{
@@ -105,6 +105,7 @@ public sealed class Entrypoint
 
 	public static void Start()
 	{
+		Defines.Init();
 		Config.Init();
 
 		foreach (string file in PreloadPreUpdate)
@@ -281,7 +282,7 @@ public sealed class Entrypoint
 			return;
 		}
 
-		if (!Directory.Exists(Path.Combine(Context.Game, "oxide")))
+		if (!Directory.Exists(Path.Combine(Defines.GetRustRootFolder(), "oxide")))
 		{
 			return;
 		}

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Carbon.Core;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -26,15 +27,15 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 	static AssemblyCSharp()
 	{
 		_resolver = new DefaultAssemblyResolver();
-		_resolver.AddSearchDirectory(Context.CarbonLib);
-		_resolver.AddSearchDirectory(Context.CarbonModules);
-		_resolver.AddSearchDirectory(Context.CarbonManaged);
-		_resolver.AddSearchDirectory(Context.GameManaged);
+		_resolver.AddSearchDirectory(Defines.GetRootFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedFolder());
+		_resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
 	}
 
 	public AssemblyCSharp()
 	{
-		_filename = Path.Combine(Context.GameManaged, "Assembly-CSharp.dll");
+		_filename = Path.Combine(Defines.GetRustManagedFolder(), "Assembly-CSharp.dll");
 
 		if (!File.Exists(_filename))
 			throw new Exception($"Assembly file '{_filename}' was not found");
@@ -202,7 +203,7 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 		try
 		{
 			AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(
-				new MemoryStream(File.ReadAllBytes(Path.Combine(Context.CarbonManaged, "Carbon.Bootstrap.dll"))));
+				new MemoryStream(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Bootstrap.dll"))));
 
 			TypeDefinition type1 = assembly.MainModule.GetType("Carbon", "Bootstrap")
 				?? throw new Exception("Unable to get a type for 'Carbon.Bootstrap'");
@@ -248,7 +249,7 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 			Logger.Debug($" - Patching BasePlayer.IPlayer");
 
 			AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(
-				new MemoryStream(File.ReadAllBytes(Path.Combine(Context.CarbonManaged, "Carbon.Common.dll"))));
+				new MemoryStream(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Common.dll"))));
 
 			TypeDefinition type1 = assembly.MainModule.GetType("Oxide.Core.Libraries.Covalence", "IPlayer")
 				?? throw new Exception("Unable to get a type for 'API.Contracts.IPlayer'");
