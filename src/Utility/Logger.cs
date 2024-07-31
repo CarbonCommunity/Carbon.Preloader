@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Carbon.Core;
 
 /*
  *
@@ -15,7 +16,7 @@ namespace Doorstop.Utility;
 internal sealed class Logger
 {
 	private static string logFile
-		= Path.Combine(Context.CarbonLogs, $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
+		= Path.Combine(Defines.GetLogsFolder(), $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
 
 	internal enum Severity
 	{
@@ -26,8 +27,8 @@ internal sealed class Logger
 
 	static Logger()
 	{
-		if (!Directory.Exists(Context.CarbonLogs))
-			Directory.CreateDirectory(Context.CarbonLogs);
+		if (!Directory.Exists(Defines.GetLogsFolder()))
+			Directory.CreateDirectory(Defines.GetLogsFolder());
 		//else if (File.Exists(logFile)) File.Delete(logFile);
 	}
 

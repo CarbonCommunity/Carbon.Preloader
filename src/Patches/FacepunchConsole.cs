@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Carbon.Core;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
 using Doorstop.Utility;
@@ -26,15 +27,15 @@ internal sealed class FacepunchConsole : MarshalByRefObject
 	static FacepunchConsole()
 	{
 		_resolver = new DefaultAssemblyResolver();
-		_resolver.AddSearchDirectory(Context.CarbonLib);
-		_resolver.AddSearchDirectory(Context.CarbonModules);
-		_resolver.AddSearchDirectory(Context.CarbonManaged);
-		_resolver.AddSearchDirectory(Context.GameManaged);
+		_resolver.AddSearchDirectory(Defines.GetLibFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
+		_resolver.AddSearchDirectory(Defines.GetManagedFolder());
+		_resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
 	}
 
 	public FacepunchConsole()
 	{
-		_filename = Path.Combine(Context.GameManaged, "Facepunch.Console.dll");
+		_filename = Path.Combine(Defines.GetRustManagedFolder(), "Facepunch.Console.dll");
 
 		if (!File.Exists(_filename))
 			throw new Exception($"Assembly file '{_filename}' was not found");

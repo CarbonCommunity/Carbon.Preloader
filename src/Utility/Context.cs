@@ -1,82 +1,235 @@
-﻿using System;
-using System.IO;
-using Carbon.Extensions;
-
-/*
+﻿/*
  *
  * Copyright (c) 2022-2024 Carbon Community
  * All rights reserved.
  *
  */
 
-namespace Doorstop.Utility;
+using System;
+using System.IO;
+using Carbon.Extensions;
 
-internal sealed class Context
+namespace Carbon.Core;
+
+[Serializable]
+public class Defines
 {
-	private static readonly string[]
-		Needles = { ".", "..", "../.." };
-
-	internal static readonly string
-		Game, GameManaged,
-		Carbon, CarbonManaged, CarbonLib, CarbonHooks, CarbonModules, CarbonExtensions, CarbonReport, CarbonHarmony, CarbonLogs, CarbonLang, CarbonTemp, CarbonConfig;
-
-	static Context()
+	public static void Init()
 	{
-		Game = null;
-		foreach (string Needle in Needles)
-		{
-			string t = Path.GetFullPath(Path.Combine(
-				AppDomain.CurrentDomain.BaseDirectory, Needle));
+		GetRootFolder();
+		GetConfigsFolder();
+		GetModulesFolder();
+		GetDataFolder();
+		GetScriptsFolder();
+		GetExtensionsFolder();
+		GetLogsFolder();
+		GetLangFolder();
+	}
 
-			if (!System.IO.Directory.Exists(Path.Combine(t, "RustDedicated_Data"))) continue;
-			Game = t;
-			break;
-		}
+	internal static string _customRootFolder;
+	internal static string _customScriptFolder;
+	internal static string _customConfigFolder;
+	internal static string _customDataFolder;
+	internal static string _customLangFolder;
+	internal static string _customModuleFolder;
+	internal static string _customExtensionsFolder;
+	internal static string _customHarmonyFolder;
+	internal static string _customProfilesFolder;
+	internal static string _customLogsFolder;
+	internal static bool _commandLineInitialized;
 
-		try
-		{
-			if (Game == null) throw new System.Exception("Unable to find root folder");
-			GameManaged = Path.GetFullPath(Path.Combine(Game, "RustDedicated_Data", "Managed"));
+	internal static void _initializeCommandLine()
+	{
+		if (_commandLineInitialized) return;
+		_commandLineInitialized = true;
 
-			Carbon = Path.GetFullPath(CommandLineEx.GetArgumentResult("-carbon.rootdir", Path.Combine(Game, "carbon")));
-			if (!Directory.Exists(Carbon)) throw new Exception("Carbon folder is missing");
+		_customRootFolder = CommandLineEx.GetArgumentResult("-carbon.rootdir");
+		_customScriptFolder = CommandLineEx.GetArgumentResult("-carbon.scriptdir");
+		_customConfigFolder = CommandLineEx.GetArgumentResult("-carbon.configdir");
+		_customDataFolder = CommandLineEx.GetArgumentResult("-carbon.datadir");
+		_customLangFolder = CommandLineEx.GetArgumentResult("-carbon.langdir");
+		_customModuleFolder = CommandLineEx.GetArgumentResult("-carbon.moduledir");
+		_customExtensionsFolder = CommandLineEx.GetArgumentResult("-carbon.extdir");
+		_customLogsFolder = CommandLineEx.GetArgumentResult("-carbon.logdir");
+		_customProfilesFolder = CommandLineEx.GetArgumentResult("-carbon.profiledir");
+		_customHarmonyFolder = CommandLineEx.GetArgumentResult("-carbon.harmonydir");
+	}
 
-			CarbonLogs = Path.Combine(Carbon, "logs");
-			if (!Directory.Exists(CarbonLogs)) Directory.CreateDirectory(CarbonLogs);
+	public static string GetConfigFile()
+	{
+		_initializeCommandLine();
+		return Path.Combine(GetRootFolder(), "config.json");
+	}
+	public static string GetClientConfigFile()
+	{
+		_initializeCommandLine();
+		return Path.Combine(GetRootFolder(), "config.client.json");
+	}
+	public static string GetMonoProfilerConfigFile()
+	{
+		_initializeCommandLine();
+		return Path.Combine(GetRootFolder(), "config.profiler.json");
+	}
+	public static string GetCarbonAutoFile()
+	{
+		_initializeCommandLine();
+		return Path.Combine(GetRootFolder(), "config.auto.json");
+	}
 
-			CarbonManaged = Path.Combine(Carbon, "managed");
-			if (!Directory.Exists(CarbonManaged)) Directory.CreateDirectory(CarbonManaged);
+	public static string GetRootFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customRootFolder) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "carbon") : _customRootFolder);
+		Directory.CreateDirectory(folder);
 
-			CarbonLib = Path.Combine(CarbonManaged, "lib");
-			if (!Directory.Exists(CarbonLib)) Directory.CreateDirectory(CarbonLib);
+		return folder;
+	}
+	public static string GetCompilerFolder()
+	{
+		string folder = Path.Combine($"{GetRootFolder()}", "compiler");
+		Directory.CreateDirectory(folder);
 
-			CarbonHooks = Path.Combine(CarbonManaged, "hooks");
-			if (!Directory.Exists(CarbonHooks)) Directory.CreateDirectory(CarbonModules);
+		return folder;
+	}
+	public static string GetLibFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customModuleFolder) ? Path.Combine(GetManagedFolder(), "lib") : _customModuleFolder);
+		Directory.CreateDirectory(folder);
 
-			CarbonExtensions = Path.Combine(Carbon, "extensions");
-			if (!Directory.Exists(CarbonExtensions)) Directory.CreateDirectory(CarbonExtensions);
+		return folder;
+	}
+	public static string GetConfigsFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customConfigFolder) ? Path.Combine(GetRootFolder(), "configs") : _customConfigFolder);
+		Directory.CreateDirectory(folder);
 
-			CarbonLang = Path.Combine(Carbon, "lang");
-			if (!Directory.Exists(CarbonLang)) Directory.CreateDirectory(CarbonLang);
+		return folder;
+	}
+	public static string GetModulesFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customModuleFolder) ? Path.Combine(GetRootFolder(), "modules") : _customModuleFolder);
+		Directory.CreateDirectory(folder);
 
-			CarbonHarmony = Path.Combine(Carbon, "harmony");
-			if (!Directory.Exists(CarbonHarmony)) Directory.CreateDirectory(CarbonHarmony);
+		return folder;
+	}
+	public static string GetManagedModulesFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(Path.Combine(GetManagedFolder(), "modules"));
+		Directory.CreateDirectory(folder);
 
-			CarbonModules = Path.Combine(CarbonManaged, "modules");
-			if (!Directory.Exists(CarbonModules)) Directory.CreateDirectory(CarbonModules);
+		return folder;
+	}
+	public static string GetDataFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customDataFolder) ? Path.Combine(GetRootFolder(), "data") : _customDataFolder);
+		Directory.CreateDirectory(folder);
 
-			CarbonTemp = Path.Combine(Carbon, "temp");
-			if (!Directory.Exists(CarbonTemp)) Directory.CreateDirectory(CarbonTemp);
+		return folder;
+	}
+	public static string GetScriptsFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customScriptFolder) ? Path.Combine(GetRootFolder(), "plugins") : _customScriptFolder);
+		Directory.CreateDirectory(folder);
 
-			CarbonConfig = Path.Combine(Carbon, "config.json");
-			CarbonReport = Path.Combine(Carbon, "reports");
-		}
-		catch (System.Exception e)
-		{
-			Logger.Error("Critical error while loading Carbon", e);
-			System.Environment.Exit(1);
-			throw;
-		}
+		return folder;
+	}
+	public static string GetScriptBackupFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(Path.Combine(GetScriptsFolder(), "backups"));
+		Directory.CreateDirectory(folder);
 
+		return folder;
+	}
+	public static string GetScriptDebugFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(Path.Combine(GetScriptsFolder(), "debug"));
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetZipDevFolder()
+	{
+		var folder = Path.Combine(GetScriptsFolder(), "cszip_dev");
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetExtensionsFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customExtensionsFolder) ? Path.Combine(GetRootFolder(), "extensions") : _customExtensionsFolder);
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetHarmonyFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customHarmonyFolder) ? Path.Combine(GetRootFolder(), "harmony") : _customHarmonyFolder);
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetManagedFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.Combine(GetRootFolder(), "managed");
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetLogsFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customLogsFolder) ? Path.Combine(GetRootFolder(), "logs") : _customLogsFolder);
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetProfilesFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customProfilesFolder) ? Path.Combine(GetRootFolder(), "profiles") : _customProfilesFolder);
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetLangFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customLangFolder) ? Path.Combine(GetRootFolder(), "lang") : _customLangFolder);
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetTempFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.Combine($"{GetRootFolder()}", "temp");
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetRustRootFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory)));
+
+		return folder;
+	}
+	public static string GetRustManagedFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RustDedicated_Data", "Managed")));
+
+		return folder;
 	}
 }
