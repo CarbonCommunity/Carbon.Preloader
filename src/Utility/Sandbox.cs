@@ -13,7 +13,6 @@ namespace Doorstop.Utility;
 [Serializable]
 public sealed class Sandbox<T> : IDisposable where T : MarshalByRefObject
 {
-
 	private AppDomain _domain;
 	private readonly string _identifier;
 	private readonly T _proxy;

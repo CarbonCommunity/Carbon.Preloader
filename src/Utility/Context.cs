@@ -14,6 +14,8 @@ namespace Carbon.Core;
 [Serializable]
 public class Defines
 {
+	internal static string root;
+
 	public static void Init()
 	{
 		GetRootFolder();
@@ -43,6 +45,14 @@ public class Defines
 		if (_commandLineInitialized) return;
 		_commandLineInitialized = true;
 
+		try
+		{
+			root = Path.GetFullPath(Path.Combine(typeof(Defines).Assembly.Location, "..", "..", ".."));
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
 		_customRootFolder = CommandLineEx.GetArgumentResult("-carbon.rootdir");
 		_customScriptFolder = CommandLineEx.GetArgumentResult("-carbon.scriptdir");
 		_customConfigFolder = CommandLineEx.GetArgumentResult("-carbon.configdir");
@@ -79,7 +89,7 @@ public class Defines
 	public static string GetRootFolder()
 	{
 		_initializeCommandLine();
-		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customRootFolder) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "carbon") : _customRootFolder);
+		var folder = string.IsNullOrEmpty(_customRootFolder) ? Path.Combine(root, "carbon") : _customRootFolder;
 		Directory.CreateDirectory(folder);
 
 		return folder;
@@ -221,14 +231,14 @@ public class Defines
 	public static string GetRustRootFolder()
 	{
 		_initializeCommandLine();
-		var folder = Path.GetFullPath(Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory)));
+		var folder = Path.GetFullPath(Path.Combine(Path.Combine(root)));
 
 		return folder;
 	}
 	public static string GetRustManagedFolder()
 	{
 		_initializeCommandLine();
-		var folder = Path.GetFullPath(Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RustDedicated_Data", "Managed")));
+		var folder = Path.Combine(Path.Combine(root, "RustDedicated_Data", "Managed"));
 
 		return folder;
 	}
