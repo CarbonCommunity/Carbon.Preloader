@@ -34,10 +34,6 @@ internal sealed class FacepunchNetwork : MarshalByRefObject
         _resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
         _resolver.AddSearchDirectory(Defines.GetManagedFolder());
         _resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
-        foreach (var search in _resolver.GetSearchDirectories())
-        {
-        	Console.WriteLine($"FacepunchNetwork Searching : {search}");
-        }
 
 		_assembly = AssemblyDefinition.ReadAssembly(_filename,
 			parameters: new ReaderParameters { AssemblyResolver = _resolver });

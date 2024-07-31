@@ -23,7 +23,7 @@ internal sealed class Logger
 		Error, Warning, Notice, Debug, None
 	}
 
-	public static List<int> Lock = new();
+	public static object locker = new();
 
 	static Logger()
 	{
@@ -44,7 +44,7 @@ internal sealed class Logger
 			_ => throw new Exception($"Severity {severity} not implemented.")
 		};
 
-		lock (Lock)
+		lock (locker)
 		{
 			if (ex is not null)
 			{

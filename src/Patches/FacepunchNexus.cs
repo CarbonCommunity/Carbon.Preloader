@@ -33,10 +33,6 @@ internal sealed class FacepunchNexus : MarshalByRefObject
         _resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
         _resolver.AddSearchDirectory(Defines.GetManagedFolder());
         _resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
-        foreach (var search in _resolver.GetSearchDirectories())
-        {
-        	Console.WriteLine($"FacepunchNexus Searching : {search}");
-        }
 
 		_assembly = AssemblyDefinition.ReadAssembly(_filename,
 			parameters: new ReaderParameters { AssemblyResolver = _resolver });

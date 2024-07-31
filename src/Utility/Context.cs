@@ -8,6 +8,7 @@
 using System;
 using System.IO;
 using Carbon.Extensions;
+using Doorstop;
 
 namespace Carbon.Core;
 
@@ -47,7 +48,7 @@ public class Defines
 
 		try
 		{
-			root = Path.GetFullPath(Path.Combine(typeof(Defines).Assembly.Location, "..", "..", ".."));
+			root = Path.GetFullPath(Path.Combine(typeof(Entrypoint).Assembly.Location, "..", "..", ".."));
 		}
 		catch (Exception ex)
 		{
