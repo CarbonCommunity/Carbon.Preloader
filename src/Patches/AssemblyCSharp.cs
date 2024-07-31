@@ -27,7 +27,7 @@ internal sealed class AssemblyCSharp : MarshalByRefObject
 	static AssemblyCSharp()
 	{
 		_resolver = new DefaultAssemblyResolver();
-		_resolver.AddSearchDirectory(Defines.GetRootFolder());
+		_resolver.AddSearchDirectory(Defines.GetLibFolder());
 		_resolver.AddSearchDirectory(Defines.GetManagedModulesFolder());
 		_resolver.AddSearchDirectory(Defines.GetManagedFolder());
 		_resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
