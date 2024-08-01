@@ -1,4 +1,5 @@
 ﻿using System;
+using Carbon.Core;
 
 /*
  *
@@ -12,7 +13,6 @@ namespace Doorstop.Utility;
 [Serializable]
 public sealed class Sandbox<T> : IDisposable where T : MarshalByRefObject
 {
-
 	private AppDomain _domain;
 	private readonly string _identifier;
 	private readonly T _proxy;
@@ -28,7 +28,7 @@ public sealed class Sandbox<T> : IDisposable where T : MarshalByRefObject
 			// this is still not perfect but it let's run with it for now.. ideally
 			// the sandbox should be able to resolve their load requests using the
 			// domain assembly resolver event
-			ApplicationBase = Context.CarbonManaged
+			ApplicationBase = Defines.GetManagedFolder()
 		};
 
 		_domain = AppDomain.CreateDomain(_identifier, null, domaininfo);

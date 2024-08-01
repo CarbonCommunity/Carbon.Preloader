@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Carbon.Core;
 
 /*
  *
@@ -15,19 +16,19 @@ namespace Doorstop.Utility;
 internal sealed class Logger
 {
 	private static string logFile
-		= Path.Combine(Context.CarbonLogs, $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
+		= Path.Combine(Defines.GetLogsFolder(), $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
 
 	internal enum Severity
 	{
 		Error, Warning, Notice, Debug, None
 	}
 
-	public static List<int> Lock = new();
+	public static object locker = new();
 
 	static Logger()
 	{
-		if (!Directory.Exists(Context.CarbonLogs))
-			Directory.CreateDirectory(Context.CarbonLogs);
+		if (!Directory.Exists(Defines.GetLogsFolder()))
+			Directory.CreateDirectory(Defines.GetLogsFolder());
 		//else if (File.Exists(logFile)) File.Delete(logFile);
 	}
 
@@ -43,7 +44,7 @@ internal sealed class Logger
 			_ => throw new Exception($"Severity {severity} not implemented.")
 		};
 
-		lock (Lock)
+		lock (locker)
 		{
 			if (ex is not null)
 			{
