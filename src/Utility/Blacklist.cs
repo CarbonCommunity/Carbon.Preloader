@@ -1,17 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
-
 namespace Doorstop.Utility;
 
 internal static class Blacklist
 {
-
 	private static readonly string[] Items =
 	{
 		@"^SpawnGroup.(GetSpawnPoint|PostSpawnProcess|Spawn)$",

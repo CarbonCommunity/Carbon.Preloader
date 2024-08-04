@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Carbon.Core;
-
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
 
 namespace Doorstop.Utility;
 
@@ -28,8 +20,9 @@ internal sealed class Logger
 	static Logger()
 	{
 		if (!Directory.Exists(Defines.GetLogsFolder()))
+		{
 			Directory.CreateDirectory(Defines.GetLogsFolder());
-		//else if (File.Exists(logFile)) File.Delete(logFile);
+		}
 	}
 
 	internal static void Write(Severity severity, object message, Exception ex = null)
@@ -59,8 +52,7 @@ internal sealed class Logger
 					break;
 			}
 
-			File.AppendAllText(logFile,
-				$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {formatted}" + Environment.NewLine);
+			File.AppendAllText(logFile, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {formatted}" + Environment.NewLine);
 		}
 	}
 

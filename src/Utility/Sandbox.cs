@@ -1,13 +1,6 @@
 ﻿using System;
 using Carbon.Core;
 
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
-
 namespace Doorstop.Utility;
 
 [Serializable]
