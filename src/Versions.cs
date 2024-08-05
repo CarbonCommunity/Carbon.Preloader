@@ -1,11 +1,4 @@
-﻿/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
