@@ -1,34 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
+using Carbon.Core;
 
 namespace Doorstop.Utility;
 
 internal sealed class Logger
 {
 	private static string logFile
-		= Path.Combine(Context.CarbonLogs, $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
+		= Path.Combine(Defines.GetLogsFolder(), $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
 
 	internal enum Severity
 	{
 		Error, Warning, Notice, Debug, None
 	}
 
-	public static List<int> Lock = new();
+	public static object locker = new();
 
 	static Logger()
 	{
-		if (!Directory.Exists(Context.CarbonLogs))
-			Directory.CreateDirectory(Context.CarbonLogs);
-		//else if (File.Exists(logFile)) File.Delete(logFile);
+		if (!Directory.Exists(Defines.GetLogsFolder()))
+		{
+			Directory.CreateDirectory(Defines.GetLogsFolder());
+		}
 	}
 
 	internal static void Write(Severity severity, object message, Exception ex = null)
@@ -43,7 +37,7 @@ internal sealed class Logger
 			_ => throw new Exception($"Severity {severity} not implemented.")
 		};
 
-		lock (Lock)
+		lock (locker)
 		{
 			if (ex is not null)
 			{
@@ -58,8 +52,7 @@ internal sealed class Logger
 					break;
 			}
 
-			File.AppendAllText(logFile,
-				$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {formatted}" + Environment.NewLine);
+			File.AppendAllText(logFile, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {formatted}" + Environment.NewLine);
 		}
 	}
 
