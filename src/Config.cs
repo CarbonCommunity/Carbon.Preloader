@@ -1,14 +1,7 @@
 ﻿using System;
 using System.IO;
+using Carbon.Core;
 using Newtonsoft.Json;
-using Doorstop.Utility;
-
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
 
 namespace Doorstop;
 
@@ -31,12 +24,12 @@ public class Config
 			return;
 		}
 
-		if (!File.Exists(Context.CarbonConfig))
+		if (!File.Exists(Defines.GetConfigFile()))
 		{
 			Singleton = new();
 			return;
 		}
 
-		Singleton = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Context.CarbonConfig));
+		Singleton = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Defines.GetConfigFile()));
 	}
 }
