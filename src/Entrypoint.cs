@@ -9,13 +9,6 @@ using Carbon.Core;
 using Doorstop.Patches;
 using Doorstop.Utility;
 
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
-
 namespace Doorstop;
 
 [SuppressUnmanagedCodeSecurity]
@@ -25,6 +18,7 @@ public sealed class Entrypoint
 	[
 		Path.Combine(Defines.GetLibFolder(), "0Harmony.dll"),
 		Path.Combine(Defines.GetLibFolder(), "Ben.Demystifier.dll"),
+		Path.Combine(Defines.GetLibFolder(), "ZstdSharp.dll"),
 		Path.Combine(Defines.GetLibFolder(), "SharpCompress.dll")
 	];
 

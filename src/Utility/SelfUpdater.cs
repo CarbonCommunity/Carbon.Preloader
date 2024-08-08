@@ -8,13 +8,6 @@ using SharpCompress.Readers;
 
 namespace Doorstop.Utility;
 
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
-
 public static class SelfUpdater
 {
 	private const string Repository = "CarbonCommunity/Carbon";

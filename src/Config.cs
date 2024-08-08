@@ -2,14 +2,6 @@
 using System.IO;
 using Carbon.Core;
 using Newtonsoft.Json;
-using Doorstop.Utility;
-
-/*
- *
- * Copyright (c) 2022-2024 Carbon Community
- * All rights reserved.
- *
- */
 
 namespace Doorstop;
 
