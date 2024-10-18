@@ -31,8 +31,6 @@ public sealed class Entrypoint
 	[
 		Path.Combine(Defines.GetExtensionsFolder(), "CCLBootstrap.dll"),
 		Path.Combine(Defines.GetExtensionsFolder(), "Carbon.Ext.Discord.dll"),
-		Path.Combine(Defines.GetManagedFolder(), "Carbon.Common.Client.dll"),
-		Path.Combine(Defines.GetRootFolder(), "config.client.json"),
 		Path.Combine(Defines.GetRustManagedFolder(), "x64"),
 		Path.Combine(Defines.GetRustManagedFolder(), "x86"),
 		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.Common.dll"),
