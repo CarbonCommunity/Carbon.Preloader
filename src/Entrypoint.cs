@@ -21,12 +21,10 @@ public sealed class Entrypoint
 		Path.Combine(Defines.GetLibFolder(), "ZstdSharp.dll"),
 		Path.Combine(Defines.GetLibFolder(), "SharpCompress.dll")
 	];
-
 	private static readonly string[] PreloadPostUpdate =
 	[
 		Path.GetFullPath(Path.Combine(Defines.GetManagedFolder(), "Carbon.Compat.dll"))
 	];
-
 	private static readonly string[] Delete =
 	[
 		Path.Combine(Defines.GetExtensionsFolder(), "CCLBootstrap.dll"),
@@ -47,7 +45,6 @@ public sealed class Entrypoint
 	{
 		[new KeyValuePair<string, string>(Defines.GetRustManagedFolder(), "Oxide.Ext.")] = Path.Combine(Defines.GetExtensionsFolder())
 	};
-
 	private static readonly Dictionary<string, string> CopyTargetEmpty = new()
 	{
 		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "config")] = Path.Combine(Defines.GetRootFolder(), "configs"),
@@ -55,13 +52,11 @@ public sealed class Entrypoint
 		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "plugins")] = Path.Combine(Defines.GetRootFolder(), "plugins"),
 		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "lang")] = Path.Combine(Defines.GetRootFolder(), "lang")
 	};
-
 	private static readonly Dictionary<string, string> Move = new()
 	{
 		[Path.Combine(Defines.GetRootFolder(), "CCL", "oxide")] = Path.Combine(Defines.GetExtensionsFolder()),
 		[Path.Combine(Defines.GetRootFolder(), "CCL", "harmony")] = Path.Combine(Defines.GetHarmonyFolder())
 	};
-
 	private static readonly Dictionary<string, string> Rename = new()
 	{
 		[Path.Combine(Defines.GetRootFolder(), "config_client.json")] = Path.Combine(Defines.GetRootFolder(), "config.client.json"),
@@ -237,7 +232,6 @@ public sealed class Entrypoint
 			Logger.Error("Preloader fatal failure", ex);
 		}
 	}
-
 	public static void PerformCleanup()
 	{
 		foreach (var path in Delete)
@@ -264,7 +258,6 @@ public sealed class Entrypoint
 			}
 		}
 	}
-
 	public static void PerformWildcardMove()
 	{
 		foreach (var fileWildcard in WildcardMove)
@@ -290,7 +283,6 @@ public sealed class Entrypoint
 			}
 		}
 	}
-
 	public static void PerformCopyTargetEmpty()
 	{
 		if (CopyTargetEmpty.Any(x => Directory.Exists(x.Value) && new DirectoryInfo(x.Value).GetFiles().Any()))
@@ -330,7 +322,6 @@ public sealed class Entrypoint
 			}
 		}
 	}
-
 	public static void PerformMove()
 	{
 		foreach (var folder in Move)
@@ -355,7 +346,6 @@ public sealed class Entrypoint
 			}
 		}
 	}
-
 	public static void PerformRename()
 	{
 		foreach (var file in Rename)
