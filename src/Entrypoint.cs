@@ -92,7 +92,7 @@ public sealed class Entrypoint
 
 	public static void Start()
 	{
-		Defines.Init();
+		Defines.Initialize();
 		Config.Init();
 
 		foreach (string file in PreloadPreUpdate)

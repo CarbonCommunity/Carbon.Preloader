@@ -1,7 +1,8 @@
-﻿using System;
-using System.IO;
-using Carbon.Extensions;
+﻿using System.IO;
+using System;
+using Doorstop.Utility;
 using Doorstop;
+using Carbon.Extensions;
 
 namespace Carbon.Core;
 
@@ -9,8 +10,7 @@ namespace Carbon.Core;
 public class Defines
 {
 	internal static string root;
-
-	public static void Init()
+	public static void Initialize()
 	{
 		GetRootFolder();
 		GetConfigsFolder();
@@ -186,6 +186,14 @@ public class Defines
 	{
 		_initializeCommandLine();
 		var folder = Path.Combine(GetRootFolder(), "managed");
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetHooksFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.Combine(GetManagedFolder(), "hooks");
 		Directory.CreateDirectory(folder);
 
 		return folder;
