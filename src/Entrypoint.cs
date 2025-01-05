@@ -219,6 +219,18 @@ public sealed class Entrypoint
 			isolated6.Do.Write();
 		}
 
+		using Sandbox<RustData> isolated7 = new Sandbox<RustData>();
+		{
+			isolated7.Do.Init();
+
+			if (!isolated7.Do.IsPublic("SilentOrbit.ProtocolBuffers.ProtocolParser", "staticBuffer"))
+			{
+				isolated7.Do.Publicize();
+			}
+
+			isolated7.Do.Write();
+		}
+
 		try
 		{
 			PerformMove();

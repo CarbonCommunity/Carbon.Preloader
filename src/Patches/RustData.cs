@@ -48,6 +48,27 @@ internal sealed class RustData : MarshalByRefObject
 		}
 	}
 
+	internal bool IsPublic(string Type, string Field)
+	{
+		try
+		{
+			if (_assembly == null) throw new Exception($"Loaded assembly is null: {_filename}");
+
+			TypeDefinition t = _assembly.MainModule.Types.First(x => x.Name == Type);
+			if (t == null) throw new Exception($"Unable to get type definition for '{Type}'");
+
+			FieldDefinition f = t.Fields.First(x => x.Name == Field);
+			if (f == null) throw new Exception($"Unable to get field definition for '{Field}'");
+
+			return f.IsPublic;
+		}
+		catch (System.Exception ex)
+		{
+			Logger.Error(ex.Message);
+			throw ex;
+		}
+	}
+
 	internal void Publicize()
 	{
 		if (_assembly == null) throw new Exception($"Loaded assembly is null: {_filename}");
