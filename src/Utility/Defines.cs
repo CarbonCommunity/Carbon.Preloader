@@ -22,6 +22,7 @@ public class Defines
 		GetLangFolder();
 	}
 
+	internal static string _customRustRootFolder;
 	internal static string _customRootFolder;
 	internal static string _customScriptFolder;
 	internal static string _customConfigFolder;
@@ -47,6 +48,7 @@ public class Defines
 		{
 			Console.WriteLine(ex.ToString());
 		}
+		_customRustRootFolder = CommandLineEx.GetArgumentResult("-carbon.rustrootdir");
 		_customRootFolder = CommandLineEx.GetArgumentResult("-carbon.rootdir");
 		_customScriptFolder = CommandLineEx.GetArgumentResult("-carbon.scriptdir");
 		_customConfigFolder = CommandLineEx.GetArgumentResult("-carbon.configdir");
@@ -233,14 +235,14 @@ public class Defines
 	public static string GetRustRootFolder()
 	{
 		_initializeCommandLine();
-		var folder = Path.GetFullPath(Path.Combine(Path.Combine(root)));
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customRustRootFolder) ? root : _customRustRootFolder);
 
 		return folder;
 	}
 	public static string GetRustManagedFolder()
 	{
 		_initializeCommandLine();
-		var folder = Path.Combine(Path.Combine(root, "RustDedicated_Data", "Managed"));
+		var folder = Path.Combine(Path.Combine(GetRustRootFolder(), "RustDedicated_Data", "Managed"));
 
 		return folder;
 	}

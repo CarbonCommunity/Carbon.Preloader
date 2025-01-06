@@ -67,6 +67,11 @@ public class AssemblyCSharp() : Patch(Defines.GetRustManagedFolder(), "Assembly-
 	}
 	private void InjectBootstrap()
 	{
+		if (bootstrap == null)
+		{
+			return;
+		}
+
 		var type1 = bootstrap.MainModule.GetType("Carbon", "Bootstrap") ?? throw new Exception("Unable to get a type for 'Carbon.Bootstrap'");
 		var method1 = type1.Methods.Single(x => x.Name == "Initialize") ?? throw new Exception("Unable to get a method definition for 'Tier0'");
 		var type2 = assembly.MainModule.GetType("Bootstrap") ?? throw new Exception("Unable to get a type for 'Bootstrap'");
@@ -97,9 +102,13 @@ public class AssemblyCSharp() : Patch(Defines.GetRustManagedFolder(), "Assembly-
 
 		Logger.Debug($" - Patching BasePlayer.IPlayer");
 
-		var common = AssemblyDefinition.ReadAssembly( new MemoryStream(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Common.dll"))));
-		var iPlayerType = common.MainModule.GetType("Oxide.Core.Libraries.Covalence", "IPlayer") ?? throw new Exception("Unable to get a type for 'API.Contracts.IPlayer'");
-		var basePlayerType = assembly.MainModule.GetType("BasePlayer") ?? throw new Exception("Unable to get a type for 'BasePlayer'");
-		basePlayerType.Fields.Add(item: new FieldDefinition("IPlayer", FieldAttributes.Public | FieldAttributes.NotSerialized, assembly.MainModule.ImportReference(iPlayerType)));
+		try
+		{
+			var common = AssemblyDefinition.ReadAssembly( new MemoryStream(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Common.dll"))));
+			var iPlayerType = common.MainModule.GetType("Oxide.Core.Libraries.Covalence", "IPlayer") ?? throw new Exception("Unable to get a type for 'API.Contracts.IPlayer'");
+			var basePlayerType = assembly.MainModule.GetType("BasePlayer") ?? throw new Exception("Unable to get a type for 'BasePlayer'");
+			basePlayerType.Fields.Add(item: new FieldDefinition("IPlayer", FieldAttributes.Public | FieldAttributes.NotSerialized, assembly.MainModule.ImportReference(iPlayerType)));
+		}
+		catch { }
 	}
 }

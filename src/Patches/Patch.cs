@@ -14,7 +14,12 @@ public class Patch : IDisposable
 
 	public static void Init()
 	{
-		bootstrap = AssemblyDefinition.ReadAssembly(new MemoryStream(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Bootstrap.dll"))));
+		try
+		{
+			bootstrap = AssemblyDefinition.ReadAssembly(
+				new MemoryStream(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Bootstrap.dll"))));
+		}
+		catch { }
 	}
 	public static void Uninit()
 	{
@@ -37,7 +42,10 @@ public class Patch : IDisposable
 	{
 		filePath = path;
 		fileName = name;
-		readerParameters = new ReaderParameters { AssemblyResolver = new DefaultAssemblyResolver() };
+
+		var resolver = new DefaultAssemblyResolver();
+		readerParameters = new ReaderParameters { AssemblyResolver = resolver };
+		resolver.AddSearchDirectory(Defines.GetRustManagedFolder());
 	}
 
 	public virtual bool Execute()
