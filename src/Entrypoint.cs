@@ -6,7 +6,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using Carbon.Core;
-using Doorstop.Patches;
+using Carbon.Utilities;
+using Carbon.Utilities.Patches;
 using Doorstop.Utility;
 
 namespace Doorstop;
@@ -41,9 +42,9 @@ public sealed class Entrypoint
 		Path.Combine(Defines.GetRustManagedFolder(), "Oxide.Unity.dll")
 	];
 
-	private static readonly Dictionary<KeyValuePair<string, string>, string> WildcardMove = new()
+	private static readonly Dictionary<(string directory, string filter), string> WildcardMove = new()
 	{
-		[new KeyValuePair<string, string>(Defines.GetRustManagedFolder(), "Oxide.Ext.")] = Path.Combine(Defines.GetExtensionsFolder())
+		[(Defines.GetRustManagedFolder(), "Oxide.Ext.")] = Path.Combine(Defines.GetExtensionsFolder())
 	};
 	private static readonly Dictionary<string, string> CopyTargetEmpty = new()
 	{
@@ -90,6 +91,12 @@ public sealed class Entrypoint
 
 	#endregion
 
+	public static Patch[] Patches =
+	[
+		new AssemblyCSharp(),
+		new FacepunchConsole()
+	];
+
 	public static void Start()
 	{
 		Defines.Initialize();
@@ -99,7 +106,7 @@ public sealed class Entrypoint
 		{
 			try
 			{
-				Assembly harmony = Assembly.LoadFile(file);
+				var harmony = Assembly.LoadFile(file);
 				Logger.Log($" Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
 			}
 			catch (Exception e)
@@ -153,83 +160,39 @@ public sealed class Entrypoint
 			Logger.Error("Failed to init native", ex);
 		}
 
-		string assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-		Logger.Debug($">> {assemblyName} is using a mono injector as entrypoint");
+		var patchableFiles = Directory.EnumerateFiles(Defines.GetRustManagedFolder());
 
-		using Sandbox<AssemblyCSharp> isolated1 = new Sandbox<AssemblyCSharp>();
+		Patch.Init();
+		foreach (var file in patchableFiles)
 		{
-			isolated1.Do.Init();
-
-			if (!isolated1.Do.IsPublic("ServerMgr", "Shutdown"))
+			try
 			{
-				isolated1.Do.Publicize();
+				var name = Path.GetFileName(file);
+				var patch = Patches.FirstOrDefault(x => x.fileName.Equals(name));
+
+				if (patch != null && patch.Execute())
+				{
+					patch.Write();
+					continue;
+				}
+
+				if (!Config.Singleton.Publicizer.PublicizedAssemblies.Any(x => name.StartsWith(x, StringComparison.OrdinalIgnoreCase)))
+				{
+					continue;
+				}
+
+				patch = new Patch(Path.GetDirectoryName(file), name);
+				if (patch.Execute())
+				{
+					patch.Write();
+				}
 			}
-
-			isolated1.Do.Patch();
-			isolated1.Do.Write();
-		}
-
-		using Sandbox<RustHarmony> isolated2 = new Sandbox<RustHarmony>();
-		{
-			isolated2.Do.Init();
-			isolated2.Do.Patch();
-			isolated2.Do.Write();
-		}
-
-		using Sandbox<FacepunchConsole> isolated3 = new Sandbox<FacepunchConsole>();
-		{
-			isolated3.Do.Init();
-			isolated3.Do.Patch();
-			isolated3.Do.Write();
-		}
-
-		using Sandbox<FacepunchNetwork> isolated4 = new Sandbox<FacepunchNetwork>();
-		{
-			isolated4.Do.Init();
-
-			if (!isolated4.Do.IsPublic("Networkable", "sv"))
+			catch (Exception ex)
 			{
-				isolated4.Do.Publicize();
+				Logger.Error("Failed to patch", ex);
 			}
-
-			isolated4.Do.Write();
 		}
-
-		using Sandbox<RustClansLocal> isolated5 = new Sandbox<RustClansLocal>();
-		{
-			isolated5.Do.Init();
-
-			if (!isolated5.Do.IsPublic("LocalClanDatabase"))
-			{
-				isolated5.Do.Publicize();
-			}
-
-			isolated5.Do.Write();
-		}
-
-		using Sandbox<FacepunchNexus> isolated6 = new Sandbox<FacepunchNexus>();
-		{
-			isolated6.Do.Init();
-
-			if (!isolated6.Do.IsPublic("Util"))
-			{
-				isolated6.Do.Publicize();
-			}
-
-			isolated6.Do.Write();
-		}
-
-		using Sandbox<RustData> isolated7 = new Sandbox<RustData>();
-		{
-			isolated7.Do.Init();
-
-			if (!isolated7.Do.IsPublic("SilentOrbit.ProtocolBuffers.ProtocolParser", "staticBuffer"))
-			{
-				isolated7.Do.Publicize();
-			}
-
-			isolated7.Do.Write();
-		}
+		Patch.Uninit();
 
 		try
 		{
@@ -274,11 +237,11 @@ public sealed class Entrypoint
 	{
 		foreach (var fileWildcard in WildcardMove)
 		{
-			var files = Directory.GetFiles(fileWildcard.Key.Key);
+			var files = Directory.GetFiles(fileWildcard.Key.directory);
 
 			foreach (var file in files)
 			{
-				if (!file.Contains(fileWildcard.Key.Value))
+				if (!file.Contains(fileWildcard.Key.filter))
 				{
 					continue;
 				}

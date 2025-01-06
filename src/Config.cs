@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Carbon.Core;
 using Newtonsoft.Json;
@@ -11,10 +12,21 @@ public class Config
 	public static Config Singleton;
 
 	public SelfUpdatingConfig SelfUpdating { get; set; } = new();
+	public PublicizerConfig Publicizer { get; set; } = new();
 
 	public class SelfUpdatingConfig
 	{
 		public bool Enabled { get; set; } = true;
+	}
+
+	public class PublicizerConfig
+	{
+		public string[] PublicizedAssemblies { get; set; } =
+		[
+			"Assembly",
+			"Facepunch",
+			"Rust"
+		];
 	}
 
 	public static void Init()
