@@ -11,13 +11,19 @@ internal static class Blacklist
 		@"^TriggerParentElevator.IsClipping$",
 		@"^DroppedItem.TransformHasMoved$",
 		@"^HiddenValueBase$",
-		@"^HiddenValue`1$"
+		@"^HiddenValue`1$",
+		@"^Pool$"
 	};
 
-	internal static bool IsBlacklisted(string Name)
+	internal static bool IsBlacklisted(string name)
 	{
-		foreach (string Item in Items)
-			if (Regex.IsMatch(Name, Item)) return true;
+		foreach (string item in Items)
+		{
+			if (Regex.IsMatch(name, item))
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 }
