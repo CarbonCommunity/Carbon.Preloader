@@ -95,7 +95,7 @@ public class Patch : IDisposable
 		{
 			if (assembly == null)
 			{
-				throw new Exception($"Loaded assembly is null: {GetFullPath}");
+				throw new Exception($"Loaded assembly is null: {GetFullPath()}");
 			}
 
 			var typeDef = assembly.MainModule.Types.First(x => x.Name == type) ?? throw new Exception($"Unable to get type definition for '{type}'");
@@ -113,7 +113,7 @@ public class Patch : IDisposable
 	{
 		if (assembly == null)
 		{
-			throw new Exception($"Loaded assembly is null: {GetFullPath}");
+			throw new Exception($"Loaded assembly is null: {GetFullPath()}");
 		}
 
 		Logger.Debug($" - Publicize assembly");
