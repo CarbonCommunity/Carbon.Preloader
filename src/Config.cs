@@ -23,9 +23,13 @@ public class Config
 	{
 		public string[] PublicizedAssemblies { get; set; } =
 		[
-			"Assembly",
-			"Facepunch",
-			"Rust"
+			"Assembly-CSharp.dll",
+			"Facepunch.Console.dll",
+			"Facepunch.Network.dll",
+			"Facepunch.Nexus.dll",
+			"Rust.Clans.Local.dll",
+			"Rust.Harmony.dll",
+			"Rust.Data.dll"
 		];
 	}
 
