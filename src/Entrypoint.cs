@@ -56,7 +56,6 @@ public sealed class Entrypoint
 	private static readonly Dictionary<string, string> Move = new()
 	{
 		[Path.Combine(Defines.GetRootFolder(), "CCL", "oxide")] = Path.Combine(Defines.GetExtensionsFolder()),
-		[Path.Combine(Defines.GetRootFolder(), "CCL", "harmony")] = Path.Combine(Defines.GetHarmonyFolder())
 	};
 	private static readonly Dictionary<string, string> Rename = new()
 	{

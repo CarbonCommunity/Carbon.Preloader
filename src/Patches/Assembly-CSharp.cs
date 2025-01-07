@@ -19,7 +19,6 @@ public class AssemblyCSharp() : Patch(Defines.GetRustManagedFolder(), "Assembly-
 
 		try
 		{
-			RemoveNativeHarmony();
 			InjectBootstrap();
 			InjectIPlayer();
 		}
@@ -31,40 +30,7 @@ public class AssemblyCSharp() : Patch(Defines.GetRustManagedFolder(), "Assembly-
 
 		return true;
 	}
-
-	private void RemoveNativeHarmony()
-	{
-		var type = assembly.MainModule.GetType("ConVar.Harmony");
-		var items = (string[])["Load", "Unload"];
-
-		foreach (string item in items)
-		{
-			Logger.Debug($" - Patching {type.Name}.{item}");
-
-			var method = type.Methods.Single(x => x.Name == item);
-			var processor = method.Body.GetILProcessor();
-
-			method.Body.Variables.Clear();
-			method.Body.Instructions.Clear();
-			method.Body.ExceptionHandlers.Clear();
-
-			switch (method.ReturnType.FullName)
-			{
-				case "System.Void":
-					break;
-
-				case "System.Boolean":
-					processor.Append(processor.Create(OpCodes.Ldc_I4_0));
-					break;
-
-				default:
-					processor.Append(processor.Create(OpCodes.Ldnull));
-					break;
-			}
-
-			processor.Append(processor.Create(OpCodes.Ret));
-		}
-	}
+	
 	private void InjectBootstrap()
 	{
 		if (bootstrap == null)
