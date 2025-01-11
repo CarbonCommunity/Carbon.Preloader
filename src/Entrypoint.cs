@@ -52,6 +52,10 @@ public sealed class Entrypoint
 		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "plugins")] = Path.Combine(Defines.GetRootFolder(), "plugins"),
 		[Path.Combine(Defines.GetRustRootFolder(), "oxide", "lang")] = Path.Combine(Defines.GetRootFolder(), "lang")
 	};
+	private static readonly Dictionary<string, string> Copy = new()
+	{
+		[Defines.GetHarmonyFolder()] = Path.Combine(Defines.GetRustRootFolder(), "HarmonyMods")
+	};
 	private static readonly Dictionary<string, string> Move = new()
 	{
 		[Path.Combine(Defines.GetRootFolder(), "CCL", "oxide")] = Path.Combine(Defines.GetExtensionsFolder()),
@@ -221,6 +225,7 @@ public sealed class Entrypoint
 
 		try
 		{
+			PerformCopy();
 			PerformMove();
 			PerformWildcardMove();
 			PerformRename();
@@ -314,6 +319,30 @@ public sealed class Entrypoint
 			try
 			{
 				Logger.Log($" Copied oxide/{Path.GetFileName(folder.Key)} -> carbon/{Path.GetFileName(folder.Value)}");
+				IO.Copy(folder.Key, folder.Value);
+			}
+			catch (Exception e)
+			{
+				Logger.Debug($" Unable to copy '{folder.Key}' -> '{folder.Value}' ({e?.Message})");
+			}
+		}
+	}
+	public static void PerformCopy()
+	{
+		foreach (var folder in Copy)
+		{
+			if (!Directory.Exists(folder.Key))
+			{
+				continue;
+			}
+
+			if (!Directory.Exists(folder.Value))
+			{
+				Directory.CreateDirectory(folder.Value);
+			}
+
+			try
+			{
 				IO.Copy(folder.Key, folder.Value);
 			}
 			catch (Exception e)
