@@ -61,9 +61,6 @@ public class Patch : IDisposable
 		}
 
 		Publicize();
-
-		var module = assembly.MainModule.Types.FirstOrDefault(x => x.Name == "<Module>");
-		module.Fields.Add(new FieldDefinition("CarbonPatched", FieldAttributes.Private | FieldAttributes.NotSerialized, assembly.MainModule.ImportReference(typeof(int))));
 		return true;
 	}
 
@@ -99,8 +96,7 @@ public class Patch : IDisposable
 	{
 		UpdateBuffer();
 		Assembly.Load(processed);
-		Logger.Log($"Loading {fileName} {processed.Length}b");
-		// Entrypoint.override_asm(Path.GetFileNameWithoutExtension(fileName), processed);
+		Logger.Log($" Loading patched assembly {fileName}");
 	}
 
 	public void Dispose()
@@ -176,20 +172,16 @@ public class Patch : IDisposable
 					continue;
 				}
 
-				bool hasSerializeFieldAttribute = false;
+				var hasSerializeFieldAttribute = false;
 				foreach (var attribute in field.CustomAttributes)
 				{
-					if (attribute.AttributeType.FullName == "UnityEngine.SerializeField")
-					{
-						hasSerializeFieldAttribute = true;
-						break;
-					}
+					if (attribute.AttributeType.FullName != "UnityEngine.SerializeField") continue;
+					hasSerializeFieldAttribute = true;
+					break;
 				}
 
 				if (!field.IsPublic && !hasSerializeFieldAttribute)
-				{
 					field.IsNotSerialized = true;
-				}
 
 				field.IsPublic = true;
 			}
@@ -198,7 +190,6 @@ public class Patch : IDisposable
 			{
 				if (property.GetMethod != null)
 					property.GetMethod.IsPublic = true;
-
 				if (property.SetMethod != null)
 					property.SetMethod.IsPublic = true;
 			}

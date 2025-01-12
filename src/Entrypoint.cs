@@ -8,7 +8,6 @@ using System.Security;
 using Carbon.Core;
 using Carbon.Utilities.Patches;
 using Doorstop.Utility;
-using HarmonyLib;
 using Patch = Carbon.Utilities.Patch;
 
 namespace Doorstop;
@@ -92,7 +91,6 @@ public sealed class Entrypoint
 	#endregion
 
 	public static Patch[] Patches = [new AssemblyCSharp()];
-
 	public static List<Patch> Publicized = new();
 
 	public static void Start()
@@ -146,7 +144,6 @@ public sealed class Entrypoint
 
 		PerformStartup();
 	}
-
 	public static void PerformStartup()
 	{
 		try
