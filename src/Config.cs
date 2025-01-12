@@ -11,6 +11,7 @@ public class Config
 {
 	public static Config Singleton;
 
+	public bool DeveloperMode { get; set; } = false;
 	public SelfUpdatingConfig SelfUpdating { get; set; } = new();
 	public PublicizerConfig Publicizer { get; set; } = new();
 

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Carbon.Core;
 using Doorstop;
 using Doorstop.Utility;
 using Mono.Cecil;
+using FieldAttributes = Mono.Cecil.FieldAttributes;
 
 namespace Carbon.Utilities;
 
@@ -32,6 +34,7 @@ public class Patch : IDisposable
 
 	public string GetFullPath() => Path.Combine(filePath, fileName);
 
+	public byte[] processed;
 	public string filePath;
 	public string fileName;
 
@@ -58,36 +61,42 @@ public class Patch : IDisposable
 		}
 
 		Publicize();
-		Logger.Log($"Publicized '{fileName}'");
 		return true;
-
 	}
 
-	public void Write()
+	public void UpdateBuffer()
 	{
-		var module = assembly.MainModule.Types.FirstOrDefault(x => x.Name == "<Module>");
-		module.Fields.Add(new FieldDefinition("CarbonPatched", FieldAttributes.Private | FieldAttributes.NotSerialized, assembly.MainModule.ImportReference(typeof(int))));
+		if (processed != null)
+			return;
 
+		using var memoryStream = new MemoryStream();
+		assembly.Write(memoryStream);
+		processed = memoryStream.ToArray();
+		API.Assembly.PatchedAssemblies.AssemblyCache[Path.GetFileNameWithoutExtension(fileName)] = memoryStream.ToArray();
+	}
+
+	public void Write(string path)
+	{
+		UpdateBuffer();
 		try
 		{
-			Logger.Debug(" - Validating changes in-memory");
+			Logger.Debug(" - Writing to disk");
 
-			using MemoryStream memoryStream = new MemoryStream();
-			assembly.Write(memoryStream);
-			memoryStream.Position = 0;
-
-			Logger.Debug(" - Writing changes to disk");
+			File.WriteAllBytes(path, processed);
 
 			Dispose();
-
-			using var outputStream = new MemoryStream();
-			memoryStream.CopyTo(outputStream);
-			File.WriteAllBytes(GetFullPath(), memoryStream.GetBuffer());
 		}
 		catch (Exception ex)
 		{
 			Logger.Error(ex);
 		}
+	}
+
+	public void Load()
+	{
+		UpdateBuffer();
+		Assembly.Load(processed);
+		Logger.Log($" Loading patched assembly {fileName}");
 	}
 
 	public void Dispose()
@@ -126,19 +135,11 @@ public class Patch : IDisposable
 
 		Logger.Debug($" - Publicize assembly");
 
-		var scope = assembly.MainModule.AssemblyReferences.OrderByDescending(a => a.Version).FirstOrDefault(a => a.Name == "mscorlib");
-		var ctor = new MethodReference(".ctor", assembly.MainModule.TypeSystem.Void, declaringType: new TypeReference("System", "NonSerializedAttribute", assembly.MainModule, scope))
-		{
-			HasThis = true
-		};
-
 		foreach (var type in assembly.MainModule.Types)
-		{
-			Publicize(type, ctor);
-		}
+			Publicize(type);
 	}
 
-	protected static void Publicize(TypeDefinition type, MethodReference ctor)
+	protected static void Publicize(TypeDefinition type)
 	{
 		try
 		{
@@ -149,13 +150,8 @@ public class Patch : IDisposable
 			}
 
 			if (type.IsNested)
-			{
 				type.IsNestedPublic = true;
-			}
-			else
-			{
-				type.IsPublic = true;
-			}
+			else type.IsPublic = true;
 
 			foreach (var method in type.Methods)
 			{
@@ -176,19 +172,26 @@ public class Patch : IDisposable
 					continue;
 				}
 
-				// Prevent publicize auto-generated fields
-				if (type.Events.Any(x => x.Name == field.Name))
+				var hasSerializeFieldAttribute = false;
+				foreach (var attribute in field.CustomAttributes)
 				{
-					continue;
+					if (attribute.AttributeType.FullName != "UnityEngine.SerializeField") continue;
+					hasSerializeFieldAttribute = true;
+					break;
 				}
 
-				if (ctor != null && !field.IsPublic && field.CustomAttributes.All(a => a.AttributeType.FullName != "UnityEngine.SerializeField"))
-				{
+				if (!field.IsPublic && !hasSerializeFieldAttribute)
 					field.IsNotSerialized = true;
-					field.CustomAttributes.Add(item: new CustomAttribute(ctor));
-				}
 
 				field.IsPublic = true;
+			}
+
+			foreach (var property in type.Properties)
+			{
+				if (property.GetMethod != null)
+					property.GetMethod.IsPublic = true;
+				if (property.SetMethod != null)
+					property.SetMethod.IsPublic = true;
 			}
 		}
 		catch (Exception ex)
@@ -198,9 +201,6 @@ public class Patch : IDisposable
 		}
 
 		foreach (var subtype in type.NestedTypes)
-		{
-			Publicize(subtype, ctor);
-		}
+			Publicize(subtype);
 	}
-
 }

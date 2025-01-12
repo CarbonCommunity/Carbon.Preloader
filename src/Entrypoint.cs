@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using Carbon.Core;
-using Carbon.Utilities;
 using Carbon.Utilities.Patches;
 using Doorstop.Utility;
+using Patch = Carbon.Utilities.Patch;
 
 namespace Doorstop;
 
@@ -90,11 +90,8 @@ public sealed class Entrypoint
 
 	#endregion
 
-	public static Patch[] Patches =
-	[
-		new AssemblyCSharp(),
-		new FacepunchConsole()
-	];
+	public static Patch[] Patches = [new AssemblyCSharp()];
+	public static List<Patch> Publicized = new();
 
 	public static void Start()
 	{
@@ -147,7 +144,6 @@ public sealed class Entrypoint
 
 		PerformStartup();
 	}
-
 	public static void PerformStartup()
 	{
 		try
@@ -171,7 +167,11 @@ public sealed class Entrypoint
 
 				if (patch != null && patch.Execute())
 				{
-					patch.Write();
+					patch.Load();
+					if (Config.Singleton.DeveloperMode)
+					{
+						patch.Write(Path.Combine(Defines.GetDeveloperPatchedAssembliesFolder(), name));
+					}
 					continue;
 				}
 
@@ -183,7 +183,12 @@ public sealed class Entrypoint
 				patch = new Patch(Path.GetDirectoryName(file), name);
 				if (patch.Execute())
 				{
-					patch.Write();
+					patch.Load();
+					if (Config.Singleton.DeveloperMode)
+					{
+						patch.Write(Path.Combine(Defines.GetDeveloperPatchedAssembliesFolder(), name));
+					}
+					Publicized.Add(patch);
 				}
 			}
 			catch (Exception ex)
