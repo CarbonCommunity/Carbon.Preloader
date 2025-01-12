@@ -8,6 +8,7 @@ using System.Security;
 using Carbon.Core;
 using Carbon.Utilities.Patches;
 using Doorstop.Utility;
+using HarmonyLib;
 using Patch = Carbon.Utilities.Patch;
 
 namespace Doorstop;
@@ -90,11 +91,26 @@ public sealed class Entrypoint
 
 	#endregion
 
+	[HarmonyPatch("System.Reflection.RuntimeAssembly", "Location", MethodType.Getter)]
+	public class AssemblyLocationPatch
+	{
+		public static void Postfix(Assembly __instance, ref string __result)
+		{
+			if (PatchMapping.TryGetValue(__instance, out var path))
+			{
+				__result = path;
+			}
+		}
+	}
+
 	public static Patch[] Patches = [new AssemblyCSharp()];
 	public static List<Patch> Publicized = new();
+	public static Dictionary<Assembly, string> PatchMapping = new();
 
 	public static void Start()
 	{
+		new Harmony("com.carbon.locationpatch").PatchAll();
+
 		Defines.Initialize();
 		Config.Init();
 

@@ -6,6 +6,7 @@ using Carbon.Core;
 using Doorstop;
 using Doorstop.Utility;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using FieldAttributes = Mono.Cecil.FieldAttributes;
 
 namespace Carbon.Utilities;
@@ -95,7 +96,8 @@ public class Patch : IDisposable
 	public void Load()
 	{
 		UpdateBuffer();
-		Assembly.Load(processed);
+		var assembly = Assembly.Load(processed);
+		Entrypoint.PatchMapping[assembly] = Path.Combine(filePath, fileName);
 		Logger.Log($" Loading patched assembly {fileName}");
 	}
 
