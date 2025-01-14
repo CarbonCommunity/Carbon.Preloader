@@ -174,6 +174,16 @@ public class Patch : IDisposable
 					continue;
 				}
 
+				var hasEvent = false;
+				foreach (var ev in type.Events)
+				{
+					if (ev.Name != field.Name) continue;
+					hasEvent = true;
+					break;
+				}
+
+				if (hasEvent) continue;
+
 				var hasSerializeFieldAttribute = false;
 				foreach (var attribute in field.CustomAttributes)
 				{
