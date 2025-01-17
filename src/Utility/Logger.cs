@@ -5,7 +5,7 @@ using Carbon.Core;
 
 namespace Doorstop.Utility;
 
-internal sealed class Logger
+public sealed class Logger
 {
 	private static string logFile
 		= Path.Combine(Defines.GetLogsFolder(), $"{Assembly.GetExecutingAssembly().GetName().Name}.log");
@@ -56,18 +56,9 @@ internal sealed class Logger
 		}
 	}
 
-	internal static void None(object message)
-		=> Write(Logger.Severity.None, message);
-
-	internal static void Debug(object message)
-		=> Write(Logger.Severity.Debug, message);
-
-	internal static void Log(object message)
-		=> Write(Logger.Severity.Notice, message);
-
-	internal static void Warn(object message)
-		=> Write(Logger.Severity.Warning, message);
-
-	internal static void Error(object message, Exception ex = null)
-		=> Write(Logger.Severity.Error, message, ex);
+	public static void None(object message) => Write(Logger.Severity.None, message);
+	public static void Debug(object message) => Write(Logger.Severity.Debug, message);
+	public static void Log(object message) => Write(Logger.Severity.Notice, message);
+	public static void Warn(object message) => Write(Logger.Severity.Warning, message);
+	public static void Error(object message, Exception ex = null) => Write(Logger.Severity.Error, message, ex);
 }
