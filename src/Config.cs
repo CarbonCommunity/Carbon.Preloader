@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using Carbon.Core;
 using Newtonsoft.Json;
 
@@ -32,6 +33,24 @@ public class Config
 			"Rust.Harmony.dll",
 			"Rust.Data.dll"
 		];
+		public string[] PublicizerMemberIgnores { get; set; } =
+		{
+			@"^HiddenValueBase$",
+			@"^HiddenValue`1$",
+			@"^Pool$"
+		};
+
+		public bool IsMemberIgnored(string name)
+		{
+			foreach (var item in PublicizerMemberIgnores)
+			{
+				if (Regex.IsMatch(name, item))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	public static void Init()
