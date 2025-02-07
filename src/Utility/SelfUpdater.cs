@@ -20,7 +20,7 @@ public static class SelfUpdater
 	private static readonly string[] Files =
 	[
 		"carbon/managed",
-		"carbon/native/CarbonNative.dll"
+		"carbon/native"
 	];
 	private static string Tag => Release switch
 	{
@@ -112,18 +112,23 @@ public static class SelfUpdater
 			{
 				Console.Write(" Updating Carbon... ");
 
+				var carbonRoot = Defines.GetRootFolder();
 				while (reader.MoveToNextEntry())
 				{
 					var entry = reader.Entry;
 
-					if (entry.IsDirectory || !Files.Any(x => entry.Key.Contains(x))) continue;
+					if (entry.IsDirectory || !Files.Any(x => entry.Key.Contains(x)))
+					{
+						continue;
+					}
 
-					var destination = Path.Combine(Defines.GetRustRootFolder(), entry.Key);
+					var relativeFilePath = entry.Key.Replace("carbon/", string.Empty).Replace("carbon\\", string.Empty);
+					var destination = Path.Combine(carbonRoot, relativeFilePath);
 					using var fileStream = new FileStream(destination, FileMode.OpenOrCreate);
 					using var entryStream = reader.OpenEntryStream();
 					entryStream.CopyTo(fileStream);
 
-					Console.Write($"{Environment.NewLine} - {entry.Key} ({ByteEx.Format(entry.Size).ToUpper()})");
+					Console.Write($"{Environment.NewLine} - {relativeFilePath} ({entry.Size.Format().ToUpper()})");
 					count++;
 				}
 			}

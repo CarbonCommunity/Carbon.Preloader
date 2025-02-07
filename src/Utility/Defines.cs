@@ -47,16 +47,16 @@ public class Defines
 		{
 			Console.WriteLine(ex.ToString());
 		}
-		_customRustRootFolder = CommandLineEx.GetArgumentResult("-carbon.rustrootdir");
-		_customRootFolder = CommandLineEx.GetArgumentResult("-carbon.rootdir");
-		_customScriptFolder = CommandLineEx.GetArgumentResult("-carbon.scriptdir");
-		_customConfigFolder = CommandLineEx.GetArgumentResult("-carbon.configdir");
-		_customDataFolder = CommandLineEx.GetArgumentResult("-carbon.datadir");
-		_customLangFolder = CommandLineEx.GetArgumentResult("-carbon.langdir");
-		_customModuleFolder = CommandLineEx.GetArgumentResult("-carbon.moduledir");
-		_customExtensionsFolder = CommandLineEx.GetArgumentResult("-carbon.extdir");
-		_customLogsFolder = CommandLineEx.GetArgumentResult("-carbon.logdir");
-		_customProfilesFolder = CommandLineEx.GetArgumentResult("-carbon.profiledir");
+		_customRustRootFolder = "-carbon.rustrootdir".GetArgumentResult();
+		_customRootFolder = "-carbon.rootdir".GetArgumentResult();
+		_customScriptFolder = "-carbon.scriptdir".GetArgumentResult();
+		_customConfigFolder = "-carbon.configdir".GetArgumentResult();
+		_customDataFolder = "-carbon.datadir".GetArgumentResult();
+		_customLangFolder = "-carbon.langdir".GetArgumentResult();
+		_customModuleFolder = "-carbon.moduledir".GetArgumentResult();
+		_customExtensionsFolder = "-carbon.extdir".GetArgumentResult();
+		_customLogsFolder = "-carbon.logdir".GetArgumentResult();
+		_customProfilesFolder = "-carbon.profiledir".GetArgumentResult();
 	}
 
 	public static string GetConfigFile()
