@@ -88,6 +88,8 @@ public static class SelfUpdater
 
 	internal static void Execute()
 	{
+		var versionOverride = GetVersionOverride();
+		var hasVersionOverride = !string.IsNullOrEmpty(versionOverride);
 		var tag = Versions.GetVersion(Tag);
 
 		if (tag == null || string.IsNullOrEmpty(tag.Version))
@@ -95,14 +97,22 @@ public static class SelfUpdater
 			return;
 		}
 
-		if (tag.Version.Equals(Versions.CurrentVersion))
+		if (!hasVersionOverride && tag.Version.Equals(Versions.CurrentVersion))
 		{
 			Logger.Log($" Carbon {Target} is up to date, no self-updating necessary. Running {Release} build [{Versions.CurrentVersion}] on tag '{Tag}'.");
 			return;
 		}
 
-		var url = GithubReleaseUrl();
-		Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
+		var url = versionOverride ?? GithubReleaseUrl();
+
+		if (hasVersionOverride)
+		{
+			Logger.Log($" Carbon version override detected and now self-updating - {Release} [{Tag}] on {Platform} [{url}]");
+		}
+		else
+		{
+			Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
+		}
 
 		IO.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Defines.GetTempFolder(), "patch.zip")}\" \"{url}\"");
 
@@ -142,7 +152,14 @@ public static class SelfUpdater
 			Logger.Error($"Error while updating 'Carbon [{Platform}]'", e);
 		}
 
-		Logger.Log($" Carbon {Target} finished self-updating {count:n0} files. You're now running the latest {Release} build.");
+		if (hasVersionOverride)
+		{
+			Logger.Log($" Carbon finished self-updating the custom version override with {count:n0} files. You're now running the latest build.");
+		}
+		else
+		{
+			Logger.Log($" Carbon {Target} finished self-updating {count:n0} files. You're now running the latest {Release} build.");
+		}
 	}
 
 	internal static bool GetCarbonVersions()
@@ -156,5 +173,17 @@ public static class SelfUpdater
 	internal static string GithubReleaseUrl()
 	{
 		return $"http://github.com/{Repository}/releases/download/{Tag}/{File}";
+	}
+
+	internal static string GetVersionOverride()
+	{
+		var path = Path.Combine(Defines.GetTempFolder(), "versionoverride.txt");
+		if (System.IO.File.Exists(path))
+		{
+			var text = System.IO.File.ReadAllText(path);
+			System.IO.File.Delete(path);
+			return text;
+		}
+		return null;
 	}
 }
