@@ -32,6 +32,7 @@ public static class SelfUpdater
 		ReleaseType.RustAux02 => "rustbeta_aux02_build",
 		ReleaseType.RustAux03 => "rustbeta_aux03_build",
 		ReleaseType.Production => "production_build",
+		ReleaseType.QA => "qa_build",
 		_ => throw new ArgumentOutOfRangeException()
 	};
 	private static string File => Platform switch
@@ -42,7 +43,7 @@ public static class SelfUpdater
 	};
 
 	private enum OsType { Windows, Linux }
-	private enum ReleaseType { Edge, Preview, RustRelease, RustStaging, RustAux01, RustAux02, RustAux03, Production }
+	private enum ReleaseType { Edge, Preview, RustRelease, RustStaging, RustAux01, RustAux02, RustAux03, Production, QA }
 
 	internal static void Init()
 	{
@@ -67,6 +68,8 @@ public static class SelfUpdater
 		ReleaseType.RustAux02;
 #elif RUST_AUX03
 		ReleaseType.RustAux03;
+#elif QA
+		ReleaseType.QA;
 #else
 		ReleaseType.Edge;
 #endif
@@ -79,10 +82,10 @@ public static class SelfUpdater
 #endif
 
 		Target = IsMinimal ? "Minimal" :
-#if PROD
-		"Release";
-#else
+#if DEBUG
 		"Debug";
+#else
+		"Release";
 #endif
 	}
 
