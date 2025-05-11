@@ -11,7 +11,7 @@ namespace Doorstop.Utility;
 public static class SelfUpdater
 {
 	private const string Repository = "CarbonCommunity/Carbon";
-	private const string CarbonVersionsEndpoint = "https://carbonmod.gg/api";
+	private const string CarbonVersionsEndpoint = "https://api.carbonmod.gg/releases";
 
 	private static OsType Platform;
 	private static ReleaseType Release;
