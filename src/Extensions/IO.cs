@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace Doorstop.Utility;
+namespace Carbon.Extensions;
 
-public static class IO
+public static class OsEx
 {
 	public static void Create(string folder, bool recreate = false)
 	{

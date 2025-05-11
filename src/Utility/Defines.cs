@@ -27,6 +27,7 @@ public class Defines
 	internal static string _customScriptFolder;
 	internal static string _customConfigFolder;
 	internal static string _customDataFolder;
+	internal static string _customModifierFolder;
 	internal static string _customLangFolder;
 	internal static string _customModuleFolder;
 	internal static string _customExtensionsFolder;
@@ -52,6 +53,7 @@ public class Defines
 		_customScriptFolder = "-carbon.scriptdir".GetArgumentResult();
 		_customConfigFolder = "-carbon.configdir".GetArgumentResult();
 		_customDataFolder = "-carbon.datadir".GetArgumentResult();
+		_customModifierFolder = "-carbon.modifierdir".GetArgumentResult();
 		_customLangFolder = "-carbon.langdir".GetArgumentResult();
 		_customModuleFolder = "-carbon.moduledir".GetArgumentResult();
 		_customExtensionsFolder = "-carbon.extdir".GetArgumentResult();
@@ -126,6 +128,14 @@ public class Defines
 	{
 		_initializeCommandLine();
 		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customDataFolder) ? Path.Combine(GetRootFolder(), "data") : _customDataFolder);
+		Directory.CreateDirectory(folder);
+
+		return folder;
+	}
+	public static string GetModifierFolder()
+	{
+		_initializeCommandLine();
+		var folder = Path.GetFullPath(string.IsNullOrEmpty(_customModifierFolder) ? Path.Combine(GetRootFolder(), "modifiers") : _customModifierFolder);
 		Directory.CreateDirectory(folder);
 
 		return folder;
