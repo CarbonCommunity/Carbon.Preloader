@@ -62,7 +62,7 @@ public sealed class Entrypoint
 		}
 		catch (Exception ex)
 		{
-			Logger.Error("Failed Entrypoint.Startup! Report to developers.", ex);
+			Logger.Error("Failed Entrypoint.Startup! Report to developers.", ex.InnerException);
 		}
 	}
 }
