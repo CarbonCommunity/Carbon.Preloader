@@ -15,9 +15,7 @@ public sealed class Entrypoint
 		Path.Combine(Defines.GetLibFolder(), "0Harmony.dll"),
 		Path.Combine(Defines.GetLibFolder(), "Ben.Demystifier.dll"),
 		Path.Combine(Defines.GetLibFolder(), "ZstdSharp.dll"),
-		Path.Combine(Defines.GetLibFolder(), "SharpCompress.dll"),
-		Path.Combine(Defines.GetLibFolder(), "protobuf-net.dll"),
-		Path.Combine(Defines.GetLibFolder(), "protobuf-net.Core.dll")
+		Path.Combine(Defines.GetLibFolder(), "SharpCompress.dll")
 	];
 
 	public static void Start()
