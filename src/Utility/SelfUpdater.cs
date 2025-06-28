@@ -106,7 +106,7 @@ public static class SelfUpdater
 			return;
 		}
 
-		var url = versionOverride ?? GithubReleaseUrl();
+		var url = versionOverride ?? Config.Singleton?.SelfUpdating?.RedirectUri ?? GithubReleaseUrl();
 
 		if (hasVersionOverride)
 		{

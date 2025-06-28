@@ -17,6 +17,7 @@ public class Config
 	public class SelfUpdatingConfig
 	{
 		public bool Enabled { get; set; } = true;
+		public string RedirectUri { get; set; }
 	}
 
 	public static void Init()
