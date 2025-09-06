@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Carbon.Core;
 using Carbon.Extensions;
+using Mono.Cecil;
 using SharpCompress.Readers;
 
 namespace Doorstop.Utility;
@@ -17,6 +18,8 @@ public static class SelfUpdater
 	private static ReleaseType Release;
 	private static string Target;
 	private static bool IsMinimal;
+	private static Version LocalCarbonProtocol;
+	private static Version LocalRustProtocol;
 	private static readonly string[] Files =
 	[
 		"carbon/managed",
@@ -41,6 +44,7 @@ public static class SelfUpdater
 		OsType.Linux => $"Carbon.Linux.{Target}.tar.gz",
 		_ => throw new ArgumentOutOfRangeException()
 	};
+	private static string LocalProtocolFile => Path.Combine(Defines.GetRootFolder(), ".protocol");
 
 	private enum OsType { Windows, Linux }
 	private enum ReleaseType { Edge, Preview, RustRelease, RustStaging, RustAux01, RustAux02, RustAux03, Production, QA }
@@ -87,24 +91,46 @@ public static class SelfUpdater
 #else
 		"Release";
 #endif
+
+		if (System.IO.File.Exists(LocalProtocolFile))
+		{
+			var lines = System.IO.File.ReadAllLines(LocalProtocolFile);
+			if (lines.Length >= 1 && Version.TryParse(lines[0], out var rustProtocol))
+			{
+				LocalRustProtocol = rustProtocol;
+			}
+			if (lines.Length >= 2 && Version.TryParse(lines[1], out var carbonProtocol))
+			{
+				LocalCarbonProtocol = carbonProtocol;
+			}
+		}
 	}
 
 	internal static void Execute()
 	{
 		var versionOverride = GetVersionOverride();
 		var hasVersionOverride = !string.IsNullOrEmpty(versionOverride);
-		var tag = Versions.GetVersion(Tag);
+		var version = Versions.GetVersion(Tag);
 
-		if (tag == null || string.IsNullOrEmpty(tag.Version))
+		if (version == null || string.IsNullOrEmpty(version.Version))
 		{
 			return;
 		}
 
-		if (!hasVersionOverride && tag.Version.Equals(Versions.CurrentVersion))
+		if (!hasVersionOverride && version.Version.Equals(Versions.CurrentVersion))
 		{
 			Logger.Log($" Carbon {Target} is up to date, no self-updating necessary. Running {Release} build [{Versions.CurrentVersion}] on tag '{Tag}'.");
 			return;
 		}
+
+#if PROD
+		var currentRustProtocol = string.Empty;
+		if (!hasVersionOverride && !HasValidLocalProtocol(version, out currentRustProtocol))
+		{
+			Logger.Log($" Skipped self-updating since the pending Carbon update has changed its protocol. Update the Rust server to self-update!");
+			return;
+		}
+#endif
 
 		var url = versionOverride ?? Config.Singleton?.SelfUpdating?.RedirectUri ?? GithubReleaseUrl();
 
@@ -114,8 +140,15 @@ public static class SelfUpdater
 		}
 		else
 		{
-			Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {tag.Version}]");
+			Logger.Log($" Carbon {Target} is out of date and now self-updating - {Release} [{Tag}] on {Platform} [{Versions.CurrentVersion} -> {version.Version}]");
 		}
+
+#if PROD
+		if (!hasVersionOverride)
+		{
+			WriteLocalProtocol(currentRustProtocol, version.Protocol);
+		}
+#endif
 
 		OsEx.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Defines.GetTempFolder(), "patch.zip")}\" \"{url}\"");
 
@@ -163,6 +196,54 @@ public static class SelfUpdater
 		{
 			Logger.Log($" Carbon {Target} finished self-updating {count:n0} files. You're now running the latest {Release} build.");
 		}
+	}
+
+	internal static bool HasValidLocalProtocol(Versions.VersionValue version, out string currentRustProtocol)
+	{
+		using var rustGlobal = new MemoryStream(System.IO.File.ReadAllBytes(Path.Combine(Defines.GetRustManagedFolder(), "Rust.Global.dll")));
+		var rustGlobalAssembly = AssemblyDefinition.ReadAssembly(rustGlobal);
+		var protocol = rustGlobalAssembly.MainModule.GetType("Rust.Protocol");
+		var networkProtocol = protocol.Fields.FirstOrDefault(x => x.Name == "network").Constant;
+		var saveProtocol = protocol.Fields.FirstOrDefault(x => x.Name == "save").Constant;
+		var reportProtocol = protocol.Fields.FirstOrDefault(x => x.Name == "report").Constant;
+		currentRustProtocol = $"{networkProtocol}.{saveProtocol}.{reportProtocol}";
+		var rustProtocol = Version.Parse(currentRustProtocol);
+		rustGlobalAssembly.Dispose();
+		rustGlobalAssembly = null;
+
+		if (LocalCarbonProtocol == null || LocalRustProtocol == null)
+		{
+			return true;
+		}
+		if (!Version.TryParse(version.Protocol, out var carbonUpdateProtocol))
+		{
+			return true;
+		}
+		// If the Carbon update has a higher revision, assume it's a mandatory Carbon update regardless of protocol
+		if (LocalCarbonProtocol.Revision < carbonUpdateProtocol.Revision)
+		{
+			return true;
+		}
+
+		// Rust protocol changed - meaning Rust has updated its protocol since the last boot time
+		if (LocalRustProtocol != rustProtocol)
+		{
+			return true;
+		}
+
+		// Carbon protocol is the same, allow the update to go through
+		if (LocalCarbonProtocol == carbonUpdateProtocol)
+		{
+			return true;
+		}
+
+		// Don't update Carbon if the pending Carbon update protocol changed and the Rust server hasn't updated yet
+		return false;
+	}
+
+	internal static void WriteLocalProtocol(string rustProtocol, string carbonProtocol)
+	{
+		System.IO.File.WriteAllText(LocalProtocolFile, $"{rustProtocol}\n{carbonProtocol}");
 	}
 
 	internal static bool GetCarbonVersions()
