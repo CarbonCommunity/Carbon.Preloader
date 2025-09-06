@@ -17,6 +17,8 @@ public static class SelfUpdater
 	private static ReleaseType Release;
 	private static string Target;
 	private static bool IsMinimal;
+	private static string LocalCarbonProtocol;
+	private static string LocalRustProtocol;
 	private static readonly string[] Files =
 	[
 		"carbon/managed",
@@ -41,6 +43,7 @@ public static class SelfUpdater
 		OsType.Linux => $"Carbon.Linux.{Target}.tar.gz",
 		_ => throw new ArgumentOutOfRangeException()
 	};
+	private static string LocalProtocolFile => Path.Combine(Defines.GetRustManagedFolder(), ".carbon");
 
 	private enum OsType { Windows, Linux }
 	private enum ReleaseType { Edge, Preview, RustRelease, RustStaging, RustAux01, RustAux02, RustAux03, Production, QA }
@@ -87,6 +90,13 @@ public static class SelfUpdater
 #else
 		"Release";
 #endif
+
+		if (System.IO.File.Exists(LocalProtocolFile))
+		{
+			var lines = System.IO.File.ReadAllLines(LocalProtocolFile);
+			LocalRustProtocol = lines[0];
+			LocalCarbonProtocol = lines[1];
+		}
 	}
 
 	internal static void Execute()
