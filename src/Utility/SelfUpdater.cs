@@ -150,7 +150,7 @@ public static class SelfUpdater
 		}
 #endif
 
-		OsEx.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Defines.GetTempFolder(), "patch.zip")}\" \"{url}\"");
+		OsEx.ExecuteProcess("curl", $"-s -H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{Path.Combine(Defines.GetTempFolder(), "patch.zip")}\" \"{url}\"");
 
 		var count = 0;
 
@@ -249,7 +249,7 @@ public static class SelfUpdater
 	internal static bool GetCarbonVersions()
 	{
 		var tempPath = Path.Combine(Defines.GetTempFolder(), "versions.json");
-		var gotVersions = OsEx.ExecuteProcess("curl", $"-H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
+		var gotVersions = OsEx.ExecuteProcess("curl", $"-s -H \"Cache-Control: no-store, no-cache, must-revalidate, max-age=0\" -H \"Pragma: no-cache\" -fSL -o \"{tempPath}\" \"{CarbonVersionsEndpoint}\"");
 
 		return gotVersions && Versions.Init(System.IO.File.ReadAllText(tempPath));
 	}
