@@ -186,7 +186,7 @@ public static class SelfUpdater
 					}
 					Console.Write($"{Environment.NewLine} - {relativeFilePath} ({entry.Length.Format().ToUpper()})");
 				}
-				catch (Exception ex)
+				catch
 				{
 					Console.Write($"{Environment.NewLine} File used by another process, skipping '{relativeFilePath}' ({entry.Length.Format().ToUpper()})");
 				}
