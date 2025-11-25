@@ -157,11 +157,48 @@ public static class SelfUpdater
 		try
 		{
 			var patchPath = Path.Combine(Defines.GetTempFolder(), "patch.zip");
-			using var archive = ZipFile.OpenRead(patchPath);
+			var carbonRoot = Defines.GetRootFolder();
 
 			Console.Write(" Updating Carbon... ");
 
-			var carbonRoot = Defines.GetRootFolder();
+#if UNIX
+
+			var archive = new TarGzReader(patchPath);
+			foreach (var entry in archive.Entries)
+			{
+				if (string.IsNullOrEmpty(entry.Name) || !Files.Any(x => entry.Name.Contains(x)))
+				{
+					continue;
+				}
+
+				var relativeFilePath = entry.Name.Replace("carbon/", string.Empty).Replace("carbon\\", string.Empty);
+				var destination = Path.Combine(carbonRoot, relativeFilePath);
+				var destDir = Path.GetDirectoryName(destination);
+				if (!string.IsNullOrEmpty(destDir))
+				{
+					Directory.CreateDirectory(destDir);
+				}
+
+				try
+				{
+					using (var fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None))
+					using (var entryStream = entry.Open())
+					{
+						entryStream.CopyTo(fileStream);
+					}
+					Console.Write($"{Environment.NewLine} - {relativeFilePath} ({entry.Size.Format().ToUpper()})");
+				}
+				catch
+				{
+					Console.Write($"{Environment.NewLine} File used by another process, skipping '{relativeFilePath}' ({entry.Size.Format().ToUpper()})");
+				}
+
+				count++;
+			}
+
+#else
+
+			using var archive = ZipFile.OpenRead(patchPath);
 			foreach (var entry in archive.Entries)
 			{
 				if (string.IsNullOrEmpty(entry.Name) || !Files.Any(x => entry.FullName.Contains(x)))
@@ -193,6 +230,9 @@ public static class SelfUpdater
 
 				count++;
 			}
+
+#endif
+
 			Console.WriteLine(string.Empty);
 		}
 		catch (Exception e)
