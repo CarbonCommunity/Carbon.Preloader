@@ -10,10 +10,28 @@ namespace Doorstop;
 [SuppressUnmanagedCodeSecurity]
 public sealed class Entrypoint
 {
+	private static readonly string[] PreloadPreUpdate =
+	[
+		Path.Combine(Defines.GetLibFolder(), "SharpCompress.dll")
+	];
+
 	public static void Start()
 	{
 		Defines.Initialize();
 		Config.Init();
+
+		foreach (string file in PreloadPreUpdate)
+		{
+			try
+			{
+				var harmony = Assembly.LoadFile(file);
+				Logger.Log($" Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
+			}
+			catch (Exception e)
+			{
+				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
+			}
+		}
 
 		if (Config.Singleton.SelfUpdating.Enabled)
 		{

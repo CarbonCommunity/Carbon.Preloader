@@ -3,6 +3,9 @@
 		<Product>Carbon.Preloader</Product>
 		<OutputType>Library</OutputType>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Reference Include="System.IO.Compression" />
+	</ItemGroup>
 
 	<Import Project="$(SolutionDir)\.msbuild\Common.props" />
 	<Import Project="$(SolutionDir)\.msbuild\ReferencesRust.props" />

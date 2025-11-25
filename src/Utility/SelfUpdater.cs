@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Carbon.Core;
 using Carbon.Extensions;
 using Mono.Cecil;
-using SharpCompress.Readers;
 
 namespace Doorstop.Utility;
 
@@ -156,30 +156,42 @@ public static class SelfUpdater
 
 		try
 		{
-			using FileStream archive = System.IO.File.OpenRead(Path.Combine(Defines.GetTempFolder(), "patch.zip"));
-			using IReader reader = ReaderFactory.Open(archive);
+			var patchPath = Path.Combine(Defines.GetTempFolder(), "patch.zip");
+			using var archive = ZipFile.OpenRead(patchPath);
+
+			Console.Write(" Updating Carbon... ");
+
+			var carbonRoot = Defines.GetRootFolder();
+			foreach (var entry in archive.Entries)
 			{
-				Console.Write(" Updating Carbon... ");
-
-				var carbonRoot = Defines.GetRootFolder();
-				while (reader.MoveToNextEntry())
+				if (string.IsNullOrEmpty(entry.Name) || !Files.Any(x => entry.FullName.Contains(x)))
 				{
-					var entry = reader.Entry;
-
-					if (entry.IsDirectory || !Files.Any(x => entry.Key.Contains(x)))
-					{
-						continue;
-					}
-
-					var relativeFilePath = entry.Key.Replace("carbon/", string.Empty).Replace("carbon\\", string.Empty);
-					var destination = Path.Combine(carbonRoot, relativeFilePath);
-					using var fileStream = new FileStream(destination, FileMode.OpenOrCreate);
-					using var entryStream = reader.OpenEntryStream();
-					entryStream.CopyTo(fileStream);
-
-					Console.Write($"{Environment.NewLine} - {relativeFilePath} ({entry.Size.Format().ToUpper()})");
-					count++;
+					continue;
 				}
+
+				var relativeFilePath = entry.FullName.Replace("carbon/", string.Empty).Replace("carbon\\", string.Empty);
+				var destination = Path.Combine(carbonRoot, relativeFilePath);
+				var destDir = Path.GetDirectoryName(destination);
+				if (!string.IsNullOrEmpty(destDir))
+				{
+					Directory.CreateDirectory(destDir);
+				}
+
+				try
+				{
+					using (var fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None))
+					using (var entryStream = entry.Open())
+					{
+						entryStream.CopyTo(fileStream);
+					}
+					Console.Write($"{Environment.NewLine} - {relativeFilePath} ({entry.Length.Format().ToUpper()})");
+				}
+				catch (Exception ex)
+				{
+					Console.Write($"{Environment.NewLine} File used by another process, skipping '{relativeFilePath}' ({entry.Length.Format().ToUpper()})");
+				}
+
+				count++;
 			}
 			Console.WriteLine(string.Empty);
 		}
