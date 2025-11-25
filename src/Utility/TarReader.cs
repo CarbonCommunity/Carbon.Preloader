@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if UNIX
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -131,3 +133,4 @@ public sealed class TarGzReader
         public override string ToString() => $"{Name} ({Size} bytes)";
     }
 }
+#endif
