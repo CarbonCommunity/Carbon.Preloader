@@ -10,10 +10,6 @@ namespace Doorstop;
 [SuppressUnmanagedCodeSecurity]
 public sealed class Entrypoint
 {
-	public Entrypoint()
-	{
-	}
-
 	public static void Start()
 	{
 		Defines.Initialize();
