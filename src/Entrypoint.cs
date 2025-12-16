@@ -10,28 +10,14 @@ namespace Doorstop;
 [SuppressUnmanagedCodeSecurity]
 public sealed class Entrypoint
 {
-	private static readonly string[] PreloadPreUpdate =
-	[
-		Path.Combine(Defines.GetLibFolder(), "SharpCompress.dll")
-	];
+	public Entrypoint()
+	{
+	}
 
 	public static void Start()
 	{
 		Defines.Initialize();
 		Config.Init();
-
-		foreach (string file in PreloadPreUpdate)
-		{
-			try
-			{
-				var harmony = Assembly.LoadFile(file);
-				Logger.Log($" Preloaded {harmony.GetName().Name} {harmony.GetName().Version}");
-			}
-			catch (Exception e)
-			{
-				Logger.Log($"Unable to preload '{file}' ({e?.Message})");
-			}
-		}
 
 		if (Config.Singleton.SelfUpdating.Enabled)
 		{
@@ -53,9 +39,12 @@ public sealed class Entrypoint
 
 		try
 		{
-			Assembly.Load(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Startup.dll")))
-				.GetType("Startup.Entrypoint")
-				.GetMethod("Start", BindingFlags.Static | BindingFlags.Public).Invoke(null, null);
+			var startup = Assembly.Load(File.ReadAllBytes(Path.Combine(Defines.GetManagedFolder(), "Carbon.Startup.dll")));
+			var endpointType = startup.GetType("Startup.Entrypoint");
+			if (endpointType.GetMethod("Start", BindingFlags.Static | BindingFlags.Public) is MethodInfo method)
+			{
+				method.Invoke(null, null);
+			}
 		}
 		catch (Exception ex)
 		{
