@@ -132,7 +132,7 @@ public static class SelfUpdater
 		}
 #endif
 
-		var url = versionOverride ?? Config.Singleton?.SelfUpdating?.RedirectUri ?? GithubReleaseUrl();
+		var url = versionOverride ?? GithubReleaseUrl();
 
 		if (hasVersionOverride)
 		{
@@ -319,6 +319,10 @@ public static class SelfUpdater
 			var text = System.IO.File.ReadAllText(path);
 			System.IO.File.Delete(path);
 			return text;
+		}
+		if (!string.IsNullOrEmpty(Config.Singleton.SelfUpdating.RedirectUri))
+		{
+			return Config.Singleton.SelfUpdating.RedirectUri;
 		}
 		return null;
 	}
